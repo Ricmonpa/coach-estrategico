@@ -56,6 +56,29 @@ src/
 └── App.tsx             # Componente principal
 ```
 
+## Despliegue
+
+### Vercel (Recomendado)
+
+1. **Conectar con GitHub**:
+   - Ve a [vercel.com](https://vercel.com)
+   - Conecta tu cuenta de GitHub
+   - Importa el repositorio `coach-estrategico`
+
+2. **Configurar variables de entorno**:
+   - En el dashboard de Vercel, ve a Settings > Environment Variables
+   - Agrega `VITE_GEMINI_API_KEY` con tu API key de Gemini
+
+3. **Despliegue automático**:
+   - Cada push a `main` desplegará automáticamente
+   - URL: `https://coach-estrategico.vercel.app` (o tu dominio personalizado)
+
+### Otros proveedores
+
+- **Netlify**: Similar a Vercel, con soporte para React
+- **GitHub Pages**: Gratuito pero requiere configuración adicional
+- **Firebase Hosting**: Integración con servicios de Google
+
 ## Próximos Pasos
 
 - [ ] Backend con Node.js y Express
