@@ -13,32 +13,15 @@ interface CoachChatProps {
     unit: string;
     reasoning: string;
   }) => void;
+  inputValue: string;
+  onInputChange: (value: string) => void;
+  onSendMessage: () => void;
+  isLoading: boolean;
+  apiStatus: 'checking' | 'connected' | 'error' | 'no-key';
+  messages: ConversationMessage[];
 }
 
-const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatProps) => {
-  const [messages, setMessages] = useState<ConversationMessage[]>([
-    {
-      role: 'user',
-      parts: [{ text: 'Inicia como mi coach estratégico BruTaL. Presenta tu método y dame un desafío inicial.' }]
-    },
-    {
-      role: 'model',
-      parts: [{ text: JSON.stringify({
-        truth: 'La mayoría de los emprendedores fracasan por falta de enfoque estratégico, no por falta de esfuerzo. El 80% de tu tiempo probablemente se gasta en actividades que generan solo el 20% de tus resultados. Necesitas identificar tu punto de apalancamiento máximo.',
-        plan: [
-          'Define tu objetivo más crítico para las próximas 4 semanas. Uno solo, específico y medible.',
-          'Identifica las 3 actividades que más te alejan de ese objetivo y elimínalas esta semana.',
-          'Establece una métrica diaria que te permita medir tu progreso hacia ese objetivo.'
-        ],
-        challenge: '¿Cuál es la única cosa que, si la lograras en las próximas 4 semanas, haría que todo lo demás fuera más fácil o irrelevante? Debe ser específica, medible y con un plazo agresivo.',
-        suggestedResource: null,
-        suggestionContext: null
-      })}]
-    }
-  ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error' | 'no-key'>('checking');
+const CoachChat = ({ resources, onResourceClick, onGoalSuggestion, inputValue, onInputChange, onSendMessage, isLoading, apiStatus, messages }: CoachChatProps) => {
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,68 +39,11 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatPr
   }, [messages]);
 
   const checkApiStatus = async () => {
-    setApiStatus('checking');
-    try {
-      const status = await aiService.testConnection();
-      setApiStatus(status);
-    } catch (error) {
-      setApiStatus('error');
-    }
+    // Esta función ahora se manejará en App.tsx
+    console.log('API status check requested');
   };
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
-
-    const userMessage: ConversationMessage = {
-      role: 'user',
-      parts: [{ text: inputValue.trim() }]
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    setIsLoading(true);
-
-    try {
-      const response = await aiService.getCoachResponse([...messages, userMessage]);
-      const modelMessage: ConversationMessage = {
-        role: 'model',
-        parts: [{ text: JSON.stringify(response) }]
-      };
-      setMessages(prev => [...prev, modelMessage]);
-      
-      // Actualizar el estado de la API si la respuesta fue exitosa
-      if (apiStatus !== 'connected') {
-        setApiStatus('connected');
-      }
-    } catch (error) {
-      console.error('Error getting AI response:', error);
-      const errorMessage: ConversationMessage = {
-        role: 'model',
-        parts: [{ text: JSON.stringify({
-          truth: 'Error de comunicación con la IA. Pero eso no es excusa para no avanzar.',
-          plan: [
-            'Verifica tu conexión a internet',
-            'Asegúrate de que tu API Key de Gemini esté configurada correctamente',
-            'Mientras tanto, enfócate en lo que SÍ puedes controlar'
-          ],
-          challenge: '¿Qué acción específica puedes tomar HOY para avanzar hacia tu objetivo, independientemente de los problemas técnicos?',
-          suggestedResource: null,
-          suggestionContext: null
-        })}]
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setApiStatus('error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+  // Las funciones handleSendMessage y handleKeyPress ahora se manejan en App.tsx
 
   const renderApiStatus = () => {
     if (apiStatus === 'checking') {
@@ -305,7 +231,7 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatPr
     <div className="bg-slate-900 flex flex-col h-full relative">
       <div 
         ref={chatRef}
-        className="flex-1 overflow-y-auto p-4 pt-8 pb-32 space-y-6 custom-scrollbar"
+        className="flex-1 overflow-y-auto p-4 pt-8 pb-4 space-y-6 custom-scrollbar"
       >
         {renderApiStatus()}
         {messages.slice(1).map((message, index) => renderMessage(message, index))}
@@ -321,38 +247,6 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatPr
             </div>
           </div>
         )}
-      </div>
-
-      {/* Input field fijo en la parte inferior */}
-      <div className="bg-gradient-to-t from-slate-800/50 to-slate-700/30 backdrop-blur-sm fixed bottom-20 left-0 right-0 z-60" style={{ padding: '0.25rem 0.75rem 1rem 0.75rem' }}>
-        <div className="text-white text-sm mb-2">DEBUG: Barra de entrada visible</div>
-        <div className="flex items-end justify-between">
-          <textarea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="flex-1 border-0 py-5 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-60 focus:border-transparent shadow-2xl transition-all duration-300 text-base resize-none font-medium"
-            placeholder="Reporta tu progreso..."
-            disabled={isLoading || apiStatus !== 'connected'}
-            style={{ 
-              height: '55px', 
-              borderRadius: '16px', 
-              paddingLeft: '20px', 
-              paddingRight: '20px', 
-              marginRight: '16px',
-              backgroundColor: '#374151',
-              color: '#e2e8f0'
-            }}
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || !inputValue.trim() || apiStatus !== 'connected'}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400/50 text-white transition-all duration-200 shadow-xl hover:shadow-2xl disabled:cursor-not-allowed flex-shrink-0 flex items-center justify-center hover:scale-105 active:scale-95"
-            style={{ backgroundColor: '#2563eb', width: '52px', height: '52px', borderRadius: '16px', marginTop: '0' }}
-          >
-            <SendHorizontal className="w-5 h-5" strokeWidth={2.5} stroke="white" fill="none" />
-          </button>
-        </div>
       </div>
     </div>
   );
