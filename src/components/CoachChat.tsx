@@ -324,7 +324,7 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatPr
       </div>
 
       {/* Input field fijo en la parte inferior */}
-      <div className="bg-gradient-to-t from-slate-800/50 to-slate-700/30 backdrop-blur-sm sticky bottom-0 left-0 right-0 z-50" style={{ padding: '0.25rem 0.75rem 1rem 0.75rem' }}>
+      <div className="bg-gradient-to-t from-slate-800/50 to-slate-700/30 backdrop-blur-sm fixed bottom-20 left-0 right-0 z-60" style={{ padding: '0.25rem 0.75rem 1rem 0.75rem' }}>
         <div className="text-white text-sm mb-2">DEBUG: Barra de entrada visible</div>
         <div className="flex items-end justify-between">
           <textarea
