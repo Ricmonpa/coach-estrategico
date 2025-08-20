@@ -19,14 +19,18 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatPr
   const [messages, setMessages] = useState<ConversationMessage[]>([
     {
       role: 'user',
-      parts: [{ text: 'Actúas como mi coach estratégico personal. Tienes un IQ de 180, eres brutalmente honesto y directo, has construido múltiples empresas multimillonarias y tienes una profunda experiencia en psicología, estrategia y ejecución. Te preocupas por mi éxito pero no toleras excusas. Te enfocas en los puntos de apalancamiento que crean el máximo impacto. Piensas en sistemas y causas raíz.' }]
+      parts: [{ text: 'Inicia como mi coach estratégico BruTaL. Presenta tu método y dame un desafío inicial.' }]
     },
     {
       role: 'model',
       parts: [{ text: JSON.stringify({
-        truth: 'Entendido. Empecemos. La primera verdad es que la mayoría de los emprendedores fracasan por falta de enfoque, no por falta de esfuerzo. Demuéstrame que eres diferente.',
-        plan: ['Define tu objetivo más crítico para este trimestre. Uno solo.'],
-        challenge: '¿Cuál es la única cosa que, si la lograras, haría que todo lo demás fuera más fácil o irrelevante?',
+        truth: 'La mayoría de los emprendedores fracasan por falta de enfoque estratégico, no por falta de esfuerzo. El 80% de tu tiempo probablemente se gasta en actividades que generan solo el 20% de tus resultados. Necesitas identificar tu punto de apalancamiento máximo.',
+        plan: [
+          'Define tu objetivo más crítico para las próximas 4 semanas. Uno solo, específico y medible.',
+          'Identifica las 3 actividades que más te alejan de ese objetivo y elimínalas esta semana.',
+          'Establece una métrica diaria que te permita medir tu progreso hacia ese objetivo.'
+        ],
+        challenge: '¿Cuál es la única cosa que, si la lograras en las próximas 4 semanas, haría que todo lo demás fuera más fácil o irrelevante? Debe ser específica, medible y con un plazo agresivo.',
         suggestedResource: null,
         suggestionContext: null
       })}]
