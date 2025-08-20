@@ -302,7 +302,7 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatPr
   };
 
   return (
-    <div className="bg-slate-900 flex flex-col h-full">
+    <div className="bg-slate-900 flex flex-col h-full relative">
       <div 
         ref={chatRef}
         className="flex-1 overflow-y-auto p-4 pt-8 pb-24 space-y-6 custom-scrollbar"
@@ -324,7 +324,7 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion }: CoachChatPr
       </div>
 
       {/* Input field fijo en la parte inferior */}
-      <div className="bg-gradient-to-t from-slate-800/50 to-slate-700/30 backdrop-blur-sm fixed bottom-0 left-0 right-0 z-10" style={{ padding: '0.25rem 0.75rem 1rem 0.75rem' }}>
+      <div className="bg-gradient-to-t from-slate-800/50 to-slate-700/30 backdrop-blur-sm absolute bottom-0 left-0 right-0 z-10" style={{ padding: '0.25rem 0.75rem 1rem 0.75rem' }}>
         <div className="flex items-end justify-between">
           <textarea
             value={inputValue}
