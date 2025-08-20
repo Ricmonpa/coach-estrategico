@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { AlertCircle, SendHorizontal } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
 import type { CoachResponse, ConversationMessage, Resource } from '../types/index';
 import aiService from '../services/aiService';
 
@@ -13,15 +13,12 @@ interface CoachChatProps {
     unit: string;
     reasoning: string;
   }) => void;
-  inputValue: string;
-  onInputChange: (value: string) => void;
-  onSendMessage: () => void;
   isLoading: boolean;
   apiStatus: 'checking' | 'connected' | 'error' | 'no-key';
   messages: ConversationMessage[];
 }
 
-const CoachChat = ({ resources, onResourceClick, onGoalSuggestion, inputValue, onInputChange, onSendMessage, isLoading, apiStatus, messages }: CoachChatProps) => {
+const CoachChat = ({ resources, onResourceClick, onGoalSuggestion, isLoading, apiStatus, messages }: CoachChatProps) => {
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

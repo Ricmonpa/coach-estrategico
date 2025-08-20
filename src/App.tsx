@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import type { ViewType, Goal, ConversationMessage } from './types/index';
 import { initialGoals, resources } from './data/initialData';
@@ -144,9 +144,6 @@ function App() {
               setGoals(prev => [...prev, newGoal]);
               setCurrentView('metas'); // Cambiar a la vista de metas para ver la nueva meta
             }}
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSendMessage={handleSendMessage}
             isLoading={isLoading}
             apiStatus={apiStatus}
             messages={messages}
