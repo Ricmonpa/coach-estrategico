@@ -49,7 +49,7 @@ export class AIService {
 - Detectar oportunidades para establecer nuevas metas cuando identifiques gaps críticos en mi estrategia.
 
 **Formato de Respuesta Obligatorio (JSON):**
-Tu respuesta SIEMPRE debe estar en este formato JSON, sin excepción:
+Tu respuesta SIEMPRE debe estar en este formato JSON, sin excepción. NO incluyas texto adicional antes o después del JSON:
 
 {
   "truth": "La verdad ineludible y dolorosa sobre mi situación actual. Debe ser específica, cuantificable y brutalmente honesta.",
@@ -65,6 +65,8 @@ Tu respuesta SIEMPRE debe estar en este formato JSON, sin excepción:
     "reasoning": "Razón estratégica por la que esta meta es crítica ahora"
   } o null
 }
+
+**IMPORTANTE:** Tu respuesta debe ser ÚNICAMENTE el JSON anterior, sin texto adicional, sin explicaciones, sin markdown. Solo el JSON puro.
 
 **Reglas de Ejecución:**
 - Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
@@ -87,6 +89,22 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
 
   private extractFallbackResponse(text: string): CoachResponse | null {
     try {
+      // Si el texto parece ser una pregunta directa o un desafío, lo tratamos como challenge
+      if (text.includes('¿') || text.includes('?')) {
+        return {
+          truth: "La IA está funcionando pero no está devolviendo el formato esperado. Esto es temporal.",
+          plan: [
+            "Revisa tu conexión a internet",
+            "Verifica que tu API Key esté configurada correctamente",
+            "Mientras tanto, enfócate en lo que puedes controlar"
+          ],
+          challenge: text.trim(),
+          suggestedResource: null,
+          suggestionContext: null,
+          suggestedGoal: null
+        };
+      }
+
       // Intentar extraer información útil del texto aunque no sea JSON válido
       const lines = text.split('\n').filter(line => line.trim());
       
@@ -118,7 +136,19 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
         };
       }
       
-      return null;
+      // Si no encontramos estructura específica, tratamos todo el texto como challenge
+      return {
+        truth: "La IA está respondiendo pero no en el formato esperado. Esto es temporal.",
+        plan: [
+          "Verifica tu conexión a internet",
+          "Revisa la configuración de la API",
+          "Mientras tanto, enfócate en lo que puedes controlar"
+        ],
+        challenge: text.trim() || "¿Qué es lo que realmente te está impidiendo avanzar?",
+        suggestedResource: null,
+        suggestionContext: null,
+        suggestedGoal: null
+      };
     } catch (error) {
       console.error('Error extracting fallback response:', error);
       return null;
@@ -197,7 +227,16 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
       console.log('Texto de respuesta de Gemini:', coachText);
       
       // Limpiar el texto de la respuesta (a veces viene con markdown)
-      const cleanText = coachText.replace(/```json\n?|\n?```/g, '').trim();
+      let cleanText = coachText.trim();
+      
+      // Remover markdown de código JSON
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+      } else if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/^```\n?/, '').replace(/\n?```$/, '');
+      }
+      
+      cleanText = cleanText.trim();
       
       try {
         const parsedResponse = JSON.parse(cleanText);

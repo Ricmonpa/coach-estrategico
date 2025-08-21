@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.10",
+    "dotenv": "^17.2.1",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.539.0",
+    "node-fetch": "^3.3.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

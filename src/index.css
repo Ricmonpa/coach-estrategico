@@ -193,47 +193,14 @@ nav button > div {
   }
 }
 
-/* Ensure navigation is always visible and fixed at bottom */
-nav {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 50 !important;
-  height: 80px !important;
-  min-height: 80px !important;
-  background-color: #1e293b !important;
+/* Sidebar styles */
+.sidebar-overlay {
+  backdrop-filter: blur(4px);
 }
 
-/* Ensure proper spacing for mobile */
-@media (max-width: 767px) {
-  nav {
-    padding-bottom: env(safe-area-inset-bottom) !important;
-    height: calc(80px + env(safe-area-inset-bottom)) !important;
-    min-height: calc(80px + env(safe-area-inset-bottom)) !important;
-  }
-}
-
-/* Add padding to content to avoid overlap with fixed navigation */
+/* Ensure proper spacing for content without bottom navigation */
 .content-area {
-  padding-bottom: 80px !important;
-  height: calc(100vh - 60px - 80px) !important;
-}
-
-@media (max-width: 767px) {
-  .content-area {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
-    height: calc(100vh - 60px - calc(80px + env(safe-area-inset-bottom))) !important;
-  }
-}
-
-/* Ensure navigation buttons are properly spaced */
-nav button {
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
+  height: calc(100vh - 60px) !important;
 }
 
 /* Goal card specific styles */

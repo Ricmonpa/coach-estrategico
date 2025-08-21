@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, SendHorizontal } from 'lucide-react';
 import type { CoachResponse, ConversationMessage, Resource } from '../types/index';
 import aiService from '../services/aiService';
 
@@ -16,9 +16,12 @@ interface CoachChatProps {
   isLoading: boolean;
   apiStatus: 'checking' | 'connected' | 'error' | 'no-key';
   messages: ConversationMessage[];
+  inputValue: string;
+  onInputChange: (value: string) => void;
+  onSendMessage: () => void;
 }
 
-const CoachChat = ({ resources, onResourceClick, onGoalSuggestion, isLoading, apiStatus, messages }: CoachChatProps) => {
+const CoachChat = ({ resources, onResourceClick, onGoalSuggestion, isLoading, apiStatus, messages, inputValue, onInputChange, onSendMessage }: CoachChatProps) => {
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -225,10 +228,11 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion, isLoading, ap
   };
 
   return (
-    <div className="bg-slate-900 flex flex-col h-full relative">
+    <div className="flex flex-col h-full bg-slate-900">
+      {/* Chat messages area */}
       <div 
         ref={chatRef}
-        className="flex-1 overflow-y-auto p-4 pt-8 pb-4 space-y-6 custom-scrollbar"
+        className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar"
       >
         {renderApiStatus()}
         {messages.slice(1).map((message, index) => renderMessage(message, index))}
@@ -244,6 +248,42 @@ const CoachChat = ({ resources, onResourceClick, onGoalSuggestion, isLoading, ap
             </div>
           </div>
         )}
+      </div>
+
+      {/* Input area - fixed at bottom */}
+      <div className="flex-shrink-0 bg-gradient-to-t from-slate-800/50 to-slate-700/30 backdrop-blur-sm border-t border-slate-700/50 p-4">
+        <div className="flex items-end justify-between">
+          <textarea
+            value={inputValue}
+            onChange={(e) => onInputChange(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                onSendMessage();
+              }
+            }}
+            className="flex-1 border-0 py-5 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-60 focus:border-transparent shadow-2xl transition-all duration-300 text-base resize-none font-medium"
+            placeholder="Reporta tu progreso..."
+            disabled={isLoading || apiStatus !== 'connected'}
+            style={{ 
+              height: '55px', 
+              borderRadius: '16px', 
+              paddingLeft: '20px', 
+              paddingRight: '20px', 
+              marginRight: '16px',
+              backgroundColor: '#374151',
+              color: '#e2e8f0'
+            }}
+          />
+          <button
+            onClick={onSendMessage}
+            disabled={isLoading || !inputValue.trim() || apiStatus !== 'connected'}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400/50 text-white transition-all duration-200 shadow-xl hover:shadow-2xl disabled:cursor-not-allowed flex-shrink-0 flex items-center justify-center hover:scale-105 active:scale-95"
+            style={{ backgroundColor: '#2563eb', width: '52px', height: '52px', borderRadius: '16px', marginTop: '0' }}
+          >
+            <SendHorizontal className="w-5 h-5" strokeWidth={2.5} stroke="white" fill="none" />
+          </button>
+        </div>
       </div>
     </div>
   );

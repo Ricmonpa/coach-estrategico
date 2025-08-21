@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { SendHorizontal } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import type { ViewType, Goal, ConversationMessage } from './types/index';
 import { initialGoals, resources } from './data/initialData';
 import CoachChat from './components/CoachChat';
 import GoalsView from './components/GoalsView';
 import ResourcesView from './components/ResourcesView';
 import ProfileView from './components/ProfileView';
-import Navigation from './components/Navigation';
+import Sidebar from './components/Sidebar';
 import aiService from './services/aiService';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewType>('coach');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Cambiado a true para desktop por defecto
+  const [isMobile, setIsMobile] = useState(false);
   const [goals, setGoals] = useState<Goal[]>(initialGoals);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +38,27 @@ function App() {
     }
   ]);
 
+  // Detectar si es mobile y ajustar el estado del sidebar
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mobile = window.innerWidth < 768; // md breakpoint de Tailwind
+      setIsMobile(mobile);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []); // Solo se ejecuta una vez al montar el componente
+
+  // Manejar el estado inicial del sidebar basado en el tamaño de pantalla
+  useEffect(() => {
+    if (isMobile && isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
+    // Removemos la lógica que forzaba el sidebar abierto en desktop
+  }, [isMobile]); // Solo se ejecuta cuando cambia isMobile
+
   const handleAddGoal = (newGoal: Omit<Goal, 'id'>) => {
     const goal: Goal = {
       ...newGoal,
@@ -53,6 +76,14 @@ function App() {
   const handleSaveProfile = (data: { mission: string; values: string }) => {
     // TODO: Implement profile saving
     console.log('Profile saved:', data);
+  };
+
+  const handleViewChange = (view: ViewType) => {
+    setCurrentView(view);
+    // Solo cerrar el sidebar en mobile cuando se cambia de vista
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -117,12 +148,7 @@ function App() {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -147,6 +173,9 @@ function App() {
             isLoading={isLoading}
             apiStatus={apiStatus}
             messages={messages}
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSendMessage={handleSendMessage}
           />
         );
       case 'metas':
@@ -175,60 +204,65 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex md:justify-center md:items-start" style={{ minHeight: '100vh' }}>
-      <div className="w-full bg-slate-900 flex flex-col desktop-compact" style={{ height: '100vh', overflow: 'hidden' }}>
-        {/* Header - Fixed at top */}
-        <header className="flex items-center p-4 border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10" style={{ height: '60px', minHeight: '60px', overflow: 'visible' }}>
-          <div className="flex items-center pl-6">
+    <div className="min-h-screen bg-slate-900 flex" style={{ minHeight: '100vh' }}>
+      {/* Sidebar - siempre visible en desktop, overlay en mobile */}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        currentView={currentView}
+        onViewChange={handleViewChange}
+        isMobile={isMobile}
+      />
+      
+      {/* Main content area */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ease-out ${
+        isSidebarOpen ? 'ml-80' : 'ml-0'
+      }`}>
+        {/* Header */}
+        <header className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm flex-shrink-0" style={{ height: '60px' }}>
+          <div className="flex items-center">
+            {/* Botón hamburguesa siempre visible */}
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="mr-3 flex flex-col justify-center items-center transition-colors"
+              style={{ width: '24px', height: '24px' }}
+            >
+              <div 
+                style={{ 
+                  width: '24px', 
+                  height: '2px', 
+                  backgroundColor: 'white', 
+                  marginBottom: '4px',
+                  borderRadius: '1px'
+                }}
+              ></div>
+              <div 
+                style={{ 
+                  width: '24px', 
+                  height: '2px', 
+                  backgroundColor: 'white', 
+                  marginBottom: '4px',
+                  borderRadius: '1px'
+                }}
+              ></div>
+              <div 
+                style={{ 
+                  width: '24px', 
+                  height: '2px', 
+                  backgroundColor: 'white',
+                  borderRadius: '1px'
+                }}
+              ></div>
+            </button>
             <h1 className="text-white text-2xl font-bold">Brutalytics</h1>
           </div>
-
         </header>
         
-        {/* Content area - Takes remaining space between header and bottom nav */}
-        <div className="overflow-hidden content-area" style={{ height: 'calc(100vh - 60px - 80px)', flex: '1', overflow: 'hidden', position: 'relative', zIndex: '1', backgroundColor: 'transparent', minHeight: '200px' }}>
+        {/* Content area */}
+        <div className="flex-1 relative" style={{ backgroundColor: 'transparent' }}>
           {renderCurrentView()}
         </div>
-
-        {/* Bottom Navigation - Fixed at bottom */}
-        <Navigation 
-          currentView={currentView}
-          onViewChange={setCurrentView}
-        />
       </div>
-
-      {/* Input field fijo en la parte inferior - fuera del content area */}
-      {currentView === 'coach' && (
-        <div className="bg-gradient-to-t from-slate-800/50 to-slate-700/30 backdrop-blur-sm fixed bottom-20 left-0 right-0 z-50" style={{ padding: '0.25rem 0.75rem 1rem 0.75rem' }}>
-          <div className="flex items-end justify-between">
-            <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 border-0 py-5 placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-60 focus:border-transparent shadow-2xl transition-all duration-300 text-base resize-none font-medium"
-              placeholder="Reporta tu progreso..."
-              disabled={isLoading || apiStatus !== 'connected'}
-              style={{ 
-                height: '55px', 
-                borderRadius: '16px', 
-                paddingLeft: '20px', 
-                paddingRight: '20px', 
-                marginRight: '16px',
-                backgroundColor: '#374151',
-                color: '#e2e8f0'
-              }}
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={isLoading || !inputValue.trim() || apiStatus !== 'connected'}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400/50 text-white transition-all duration-200 shadow-xl hover:shadow-2xl disabled:cursor-not-allowed flex-shrink-0 flex items-center justify-center hover:scale-105 active:scale-95"
-              style={{ backgroundColor: '#2563eb', width: '52px', height: '52px', borderRadius: '16px', marginTop: '0' }}
-            >
-              <SendHorizontal className="w-5 h-5" strokeWidth={2.5} stroke="white" fill="none" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
