@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
 import type { ViewType, Goal, ConversationMessage } from './types/index';
 import { initialGoals, resources } from './data/initialData';
 import CoachChat from './components/CoachChat';
