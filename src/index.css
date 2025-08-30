@@ -1,3 +1,46 @@
+/* Dashboard card styling - override global background */
+.dashboard-card {
+  background-color: #374151 !important;
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+  margin-bottom: 2rem !important;
+}
+
+/* Resource cards specific styling with more spacing */
+.dashboard-card.resource-card {
+  padding: 2.5rem !important;
+}
+
+/* Force spacing between icon and content in resource cards */
+.dashboard-card.resource-card .flex-shrink-0:first-child {
+  margin-right: 2rem !important;
+}
+
+.dashboard-card.metric-card {
+  background-color: #374151 !important;
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+}
+
+.dashboard-card.focus-card {
+  background-color: #374151 !important;
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.dashboard-card.quick-actions {
+  background-color: #374151 !important;
+  border-radius: 1rem !important;
+  padding: 2rem !important;
+}
+
+/* Ensure dashboard container has proper background */
+.dashboard-container {
+  background-color: #0f172a !important;
+  min-height: 100vh !important;
+}
+
 /* Updated: 2024-12-19 - Dark theme implementation */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 @tailwind base;
@@ -12,6 +55,20 @@ body {
 
 #root {
   background-color: #0f172a !important;
+}
+
+/* Courier New font for chat messages */
+.chat-message-user,
+.chat-message-coach,
+.chat-message-structured {
+  font-family: 'Courier New', monospace !important;
+}
+
+/* Courier New bold for sidebar titles */
+.sidebar-title {
+  font-family: 'Courier New', monospace !important;
+  font-weight: bold !important;
+  font-size: 1.125rem !important; /* text-xl - 1 point */
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -60,6 +117,12 @@ nav button > div {
   padding-bottom: 8px !important;
 }
 
+/* Sobrescribir espaciado específicamente para el sidebar */
+.sidebar-nav nav button > div {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
 .typing-indicator span {
   height: 8px;
   width: 8px;
@@ -101,6 +164,30 @@ nav button > div {
   }
 }
 
+@keyframes pixelArtAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    box-shadow: 
+      0px 0px 0px rgba(0, 0, 0, 0.8),
+      0px 0px 0px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 
+      2px 2px 0px rgba(0, 0, 0, 0.8),
+      4px 4px 0px rgba(0, 0, 0, 0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    box-shadow: 
+      4px 4px 0px rgba(0, 0, 0, 0.8),
+      8px 8px 0px rgba(0, 0, 0, 0.4);
+  }
+}
+
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -114,6 +201,10 @@ nav button > div {
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
+}
+
+.animate-pixel-art {
+  animation: pixelArtAppear 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .animate-slide-in-up {
@@ -198,9 +289,120 @@ nav button > div {
   backdrop-filter: blur(4px);
 }
 
+/* Eliminar cualquier línea separadora en el sidebar */
+.sidebar-nav * {
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+.sidebar-nav hr,
+.sidebar-nav .border-t,
+.sidebar-nav .border-b {
+  display: none !important;
+}
+
+/* Eliminar completamente cualquier estilo de lista en el sidebar */
+.sidebar-nav ul,
+.sidebar-nav ul li,
+.sidebar-nav ul li * {
+  list-style: none !important;
+  list-style-type: none !important;
+  list-style-image: none !important;
+  list-style-position: outside !important;
+}
+
+/* Eliminar cualquier separador visual en el sidebar */
+.sidebar-nav ul {
+  list-style: none !important;
+  list-style-type: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.sidebar-nav ul li {
+  border: none !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  list-style-type: none !important;
+}
+
+.sidebar-nav ul li::before,
+.sidebar-nav ul li::after {
+  display: none !important;
+  content: none !important;
+}
+
+.sidebar-nav ul li button {
+  border: none !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  margin: 0 !important;
+  list-style: none !important;
+  list-style-type: none !important;
+}
+
+.sidebar-nav ul li button::before,
+.sidebar-nav ul li button::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Permitir que Tailwind maneje el espaciado en el sidebar */
+.sidebar-nav .space-y-4 > * + * {
+  margin-top: 1rem !important;
+}
+
+.sidebar-nav .p-6 {
+  padding: 1.5rem !important;
+}
+
+.sidebar-nav .flex-1 {
+  flex: 1 1 0% !important;
+}
+
+.sidebar-nav .flex-col {
+  flex-direction: column !important;
+}
+
+.sidebar-nav .h-full {
+  height: 100% !important;
+}
+
 /* Ensure proper spacing for content without bottom navigation */
 .content-area {
   height: calc(100vh - 60px) !important;
+}
+
+/* Chat container layout fixes */
+.chat-container {
+  height: calc(100vh - 60px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+}
+
+.chat-messages-area {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  height: calc(100vh - 180px) !important; /* 60px header + 80px input area + 40px extra padding */
+}
+
+.chat-input-area {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 80px !important;
+  background: #0f172a !important;
+  backdrop-filter: blur(10px) !important;
+  border-top: none !important;
+  box-shadow: none !important;
+  z-index: 10 !important;
+  transition: left 0.3s ease-out !important;
 }
 
 /* Goal card specific styles */
@@ -314,4 +516,611 @@ nav button > div {
 .goal-card button:hover {
   background-color: #3b82f6 !important;
   border-color: #60a5fa !important;
+}
+
+/* Chat message styling improvements */
+.chat-message-user {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  font-family: 'Courier New', monospace;
+}
+
+
+
+
+
+
+
+/* Structured response section styling */
+.structured-section {
+  position: relative;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border-radius: 0; /* Sharp corners for pixel art */
+  background: rgba(255, 255, 255, 0.1); /* Semi-transparent white for subtle contrast */
+  border: 2px solid #000000; /* Black border all around */
+  /* Pixel art chamfered corners for sections */
+  clip-path: polygon(
+    0% 4px,    /* Top-left chamfer */
+    4px 0%,    /* Top-left chamfer */
+    calc(100% - 4px) 0%, /* Top-right chamfer */
+    100% 4px,  /* Top-right chamfer */
+    100% calc(100% - 4px), /* Bottom-right chamfer */
+    calc(100% - 4px) 100%, /* Bottom-right chamfer */
+    4px 100%,  /* Bottom-left chamfer */
+    0% calc(100% - 4px) /* Bottom-left chamfer */
+  );
+}
+
+.structured-section h2 {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  color: #ffffff; /* White text for contrast */
+  font-size: 1.1rem;
+}
+
+/* Resource suggestion styling */
+.resource-suggestion {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.resource-suggestion:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.15) 100%);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Goal suggestion styling */
+.goal-suggestion {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* Typing indicator improvements */
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1rem 1.5rem;
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 1rem;
+  border: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+/* Input area improvements */
+.chat-input-area {
+  background: #0f172a;
+  backdrop-filter: blur(10px);
+  border-top: none !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: left 0.3s ease-out;
+}
+
+.chat-input {
+  background: rgba(55, 65, 81, 0.8);
+  border: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-input:focus {
+  background: rgba(55, 65, 81, 0.9);
+  border-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+/* Send button improvements */
+.send-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+
+.send-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.send-button:disabled {
+  background: rgba(75, 85, 99, 0.5);
+  border-color: rgba(75, 85, 99, 0.3);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Centered chat layout improvements */
+.max-w-4xl {
+  max-width: 30rem; /* Aproximadamente 13 cm (480px) */
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .chat-message-user,
+  .chat-message-coach,
+  .chat-message-structured {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .structured-section {
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .structured-section h2 {
+    font-size: 1rem;
+  }
+  
+  /* En móviles, reducir el ancho máximo para mejor experiencia */
+  .max-w-4xl {
+    max-width: 100%;
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  
+  /* Asegurar que la barra de entrada esté siempre visible en móviles */
+  .chat-input-area {
+    left: 0 !important;
+    right: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    border-top: none !important;
+    box-shadow: none !important;
+    background: #0f172a !important;
+  }
+}
+
+/* Desktop improvements */
+@media (min-width: 769px) {
+  .max-w-4xl {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Asegurar que no haya paneles de notificaciones siempre visibles en desktop */
+@media (min-width: 768px) {
+  /* Ocultar cualquier panel de notificaciones que esté siempre visible */
+  .notification-panel-always-visible,
+  .notifications-sidebar,
+  .notifications-panel {
+    display: none !important;
+  }
+  
+  /* Solo mostrar el panel de notificaciones cuando esté explícitamente abierto */
+  .notification-panel-open {
+    display: block !important;
+  }
+}
+
+/* Asegurar que el panel de notificaciones esté completamente oculto cuando no está abierto */
+.notification-panel:not(.translate-x-0) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Asegurar que el botón "Marcar todas como leídas" sea siempre visible */
+.notification-panel .flex-shrink-0 button {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+/* Notification Panel Styles */
+.notification-card {
+  background: linear-gradient(135deg, rgba(55, 65, 81, 0.95) 0%, rgba(31, 41, 55, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Asegurar que las tarjetas de notificación solo sean visibles dentro del panel abierto */
+.notification-panel:not(.translate-x-0) .notification-card {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.notification-card:hover {
+  border-color: rgba(75, 85, 99, 0.5);
+  box-shadow: 
+    0 20px 40px -10px rgba(0, 0, 0, 0.4),
+    0 8px 12px -4px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.notification-card.ring-2 {
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Mobile optimizations for notifications */
+@media (max-width: 640px) {
+  .notification-card {
+    padding: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    margin-right: 1.5rem !important;
+  }
+  
+  .notification-card .flex {
+    gap: 1rem !important;
+  }
+  
+  .notification-card h3 {
+    font-size: 1rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  .notification-card p {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Asegurar que el panel de notificaciones ocupe toda la pantalla en mobile */
+  .notification-panel {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Ajustar el contenido de scroll para mobile */
+  .notification-panel .custom-scrollbar {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 1.5rem !important;
+    padding-right: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+  
+  /* Mejorar el header en mobile */
+  .notification-panel .flex.items-center.justify-between {
+    padding: 1.5rem !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Mejorar el footer en mobile - Asegurar que sea visible */
+  .notification-panel .border-t.border-slate-700\/50 {
+    flex-shrink: 0 !important;
+    padding: 1.5rem !important;
+    padding-right: 2rem !important;
+    background: #1e293b !important;
+    border-top: 1px solid rgba(71, 85, 105, 0.5) !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
+  /* Asegurar que las tarjetas de notificación no se corten */
+  .notification-card {
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 1rem !important;
+    margin-right: 1rem !important;
+  }
+  
+  /* Ajustar el tamaño del texto en mobile */
+  .notification-card h3 {
+    font-size: 0.875rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .notification-card p {
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Ajustar el espaciado de los elementos internos */
+  .notification-card .flex {
+    gap: 0.75rem !important;
+  }
+  
+  /* Asegurar que los badges no se corten */
+  .notification-card .inline-flex {
+    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem !important;
+  }
+  
+  /* Mejorar el botón de marcar como leído en mobile */
+  .notification-card button {
+    padding: 0.75rem !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  /* Asegurar que el botón "Marcar todas como leídas" sea visible SOLO en mobile */
+  .notification-panel button[onClick*="markAsRead"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 20 !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    color: #60a5fa !important;
+    padding: 1rem 1.5rem !important;
+    border-radius: 0.5rem !important;
+    width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease-in-out !important;
+  }
+  
+  .notification-panel button[onClick*="markAsRead"]:hover {
+    background: rgba(59, 130, 246, 0.3) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+  }
+  
+  /* Regla adicional para asegurar que cualquier botón en el footer sea visible SOLO en mobile */
+  .notification-panel .flex-shrink-0 button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 20 !important;
+  }
+}
+
+/* Context Menu Styles */
+.context-menu-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.context-menu-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.context-menu-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.context-menu-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
+
+/* Desktop optimizations for notifications */
+@media (min-width: 768px) {
+  .notification-panel .dashboard-card.notification-card {
+    padding: 0.5rem !important;
+    margin-right: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    /* Hacer las tarjetas más compactas en desktop */
+    min-width: auto !important;
+  }
+  
+  .notification-panel .dashboard-card.notification-card h3 {
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .notification-panel .dashboard-card.notification-card p {
+    font-size: 0.65rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .notification-panel .dashboard-card.notification-card .flex {
+    gap: 0.5rem !important;
+  }
+  
+  .notification-panel .dashboard-card.notification-card .inline-flex {
+    font-size: 0.55rem !important;
+    padding: 0.2rem 0.4rem !important;
+  }
+  
+  /* Ajustar el header para desktop */
+  .notification-panel .flex.items-center.justify-between h2 {
+    font-size: 1rem !important;
+  }
+  
+  .notification-panel .flex.items-center.justify-between p {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Sobrescribir completamente dashboard-card para notificaciones en desktop */
+  .notification-panel .dashboard-card {
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Restaurar el comportamiento original del footer en desktop */
+  .notification-panel .border-t.border-slate-700\/50 {
+    flex-shrink: 0 !important;
+    padding: 0.75rem !important;
+    padding-right: 1.5rem !important;
+    background: rgba(30, 41, 59, 0.3) !important;
+    border-top: 1px solid rgba(71, 85, 105, 0.5) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    min-height: auto !important;
+  }
+  
+  /* Restaurar el comportamiento original del botón en desktop */
+  .notification-panel button[onClick*="markAsRead"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 20 !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    color: #60a5fa !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 0.5rem !important;
+    width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease-in-out !important;
+  }
+  
+  .notification-panel button[onClick*="markAsRead"]:hover {
+    background: rgba(59, 130, 246, 0.3) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+  }
+  
+  /* Restaurar el comportamiento original del layout en desktop */
+  .notification-panel {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .notification-panel .custom-scrollbar {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 0.75rem !important;
+    padding-right: 1.5rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  .notification-panel .flex.items-center.justify-between {
+    flex-shrink: 0 !important;
+    padding: 0.75rem !important;
+  }
+  
+  /* Asegurar que el botón sea visible en desktop - sobrescribir cualquier conflicto */
+  .notification-panel .flex-shrink-0 button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 20 !important;
+  }
+}
+
+/* Pixel Speech Bubble Component */
+.pixel-speech-bubble {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 1rem;
+}
+
+.bubble-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.bubble-background svg {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.bubble-content {
+  position: relative;
+  z-index: 2;
+  padding: 20px 24px;
+  color: #60a5fa;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Animation for the bubble */
+.pixel-speech-bubble {
+  animation: pixelBubbleAppear 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes pixelBubbleAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+
+/* Simple Chat Bubble */
+.simple-chat-bubble {
+  background-color: #0f172a; /* Color del fondo del proyecto */
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  color: #60a5fa; /* Azul más claro como el logo */
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-width: 100%;
+  animation: simpleBubbleAppear 0.4s ease-out;
+}
+
+
+
+@keyframes simpleBubbleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

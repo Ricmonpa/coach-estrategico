@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Variables de Entorno</title>
+</head>
+<body>
+    <h1>Test Variables de Entorno</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output');
+        
+        // Verificar si las variables de entorno están disponibles
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const model = import.meta.env.VITE_GEMINI_MODEL;
+        
+        output.innerHTML = `
+            <p><strong>API Key configurada:</strong> ${apiKey ? 'Sí' : 'No'}</p>
+            <p><strong>API Key (primeros 10 caracteres):</strong> ${apiKey ? apiKey.substring(0, 10) + '...' : 'No disponible'}</p>
+            <p><strong>Modelo:</strong> ${model || 'gemini-1.5-flash (default)'}</p>
+            <p><strong>URL de la API:</strong> https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-1.5-flash'}:generateContent?key=${apiKey ? 'API_KEY_CONFIGURADA' : 'NO_API_KEY'}</p>
+        `;
+        
+        // Probar la conexión con la API
+        if (apiKey) {
+            const testPayload = {
+                contents: [{
+                    role: 'user',
+                    parts: [{ text: 'Responde solo con "OK"' }]
+                }],
+                generationConfig: {
+                    maxOutputTokens: 10
+                }
+            };
+            
+            fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-1.5-flash'}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(testPayload)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            })
+            .then(data => {
+                output.innerHTML += `<p style="color: green;"><strong>✅ Conexión exitosa:</strong> ${data.candidates[0].content.parts[0].text}</p>`;
+            })
+            .catch(error => {
+                output.innerHTML += `<p style="color: red;"><strong>❌ Error de conexión:</strong> ${error.message}</p>`;
+            });
+        } else {
+            output.innerHTML += '<p style="color: orange;"><strong>⚠️ No se puede probar la conexión sin API Key</strong></p>';
+        }
+    </script>
+</body>
+</html>

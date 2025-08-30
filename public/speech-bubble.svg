@@ -1,0 +1,79 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Pixel art filter for crisp edges -->
+    <filter id="pixelate">
+      <feFlood flood-color="black" result="black"/>
+      <feMorphology operator="dilate" radius="0.5"/>
+    </filter>
+  </defs>
+  
+  <!-- Main speech bubble body -->
+  <g>
+    <!-- Background cyan fill -->
+    <rect x="4" y="4" width="320" height="120" fill="#00FFFF" stroke="none"/>
+    
+    <!-- Black border - top edge -->
+    <rect x="0" y="0" width="328" height="4" fill="black"/>
+    
+    <!-- Black border - bottom edge -->
+    <rect x="0" y="124" width="328" height="4" fill="black"/>
+    
+    <!-- Black border - left edge -->
+    <rect x="0" y="0" width="4" height="128" fill="black"/>
+    
+    <!-- Black border - right edge -->
+    <rect x="324" y="0" width="4" height="128" fill="black"/>
+    
+    <!-- Chamfered corners - top left -->
+    <rect x="0" y="0" width="8" height="8" fill="black"/>
+    <rect x="4" y="4" width="4" height="4" fill="#00FFFF"/>
+    
+    <!-- Chamfered corners - top right -->
+    <rect x="320" y="0" width="8" height="8" fill="black"/>
+    <rect x="324" y="4" width="4" height="4" fill="#00FFFF"/>
+    
+    <!-- Chamfered corners - bottom left -->
+    <rect x="0" y="120" width="8" height="8" fill="black"/>
+    <rect x="4" y="124" width="4" height="4" fill="#00FFFF"/>
+    
+    <!-- Chamfered corners - bottom right -->
+    <rect x="320" y="120" width="8" height="8" fill="black"/>
+    <rect x="324" y="124" width="4" height="4" fill="#00FFFF"/>
+    
+    <!-- Tail - pixel art triangle -->
+    <!-- Tail base connection -->
+    <rect x="16" y="124" width="12" height="4" fill="black"/>
+    <rect x="20" y="128" width="4" height="4" fill="black"/>
+    
+    <!-- Tail cyan fill -->
+    <rect x="20" y="128" width="8" height="4" fill="#00FFFF"/>
+    <rect x="24" y="132" width="4" height="4" fill="#00FFFF"/>
+    <rect x="28" y="136" width="2" height="2" fill="#00FFFF"/>
+    
+    <!-- Tail black border -->
+    <rect x="16" y="128" width="4" height="4" fill="black"/>
+    <rect x="28" y="132" width="4" height="4" fill="black"/>
+    <rect x="30" y="136" width="2" height="2" fill="black"/>
+    <rect x="32" y="138" width="1" height="1" fill="black"/>
+    
+    <!-- Shadow - stepped pixel art shadow -->
+    <rect x="8" y="132" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    <rect x="12" y="136" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    <rect x="16" y="140" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    <rect x="20" y="144" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    <rect x="24" y="148" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    <rect x="28" y="152" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    <rect x="32" y="156" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    <rect x="36" y="160" width="4" height="4" fill="rgba(0,0,0,0.8)"/>
+    
+    <!-- Additional shadow layer -->
+    <rect x="12" y="140" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+    <rect x="16" y="144" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+    <rect x="20" y="148" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+    <rect x="24" y="152" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+    <rect x="28" y="156" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+    <rect x="32" y="160" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+    <rect x="36" y="164" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+    <rect x="40" y="168" width="4" height="4" fill="rgba(0,0,0,0.4)"/>
+  </g>
+</svg>

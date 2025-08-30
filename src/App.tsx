@@ -1,36 +1,42 @@
 import { useState, useEffect } from 'react';
+import { Bell } from 'lucide-react';
 import type { ViewType, Goal, ConversationMessage } from './types/index';
-import { initialGoals, resources } from './data/initialData';
+import { initialGoals, resources, initialNotifications } from './data/initialData';
 import CoachChat from './components/CoachChat';
 import GoalsView from './components/GoalsView';
 import ResourcesView from './components/ResourcesView';
 import ProfileView from './components/ProfileView';
+import CoachDashboard from './components/CoachDashboard';
 import Sidebar from './components/Sidebar';
+import NotificationPanel from './components/NotificationPanel';
 import aiService from './services/aiService';
+import { notificationService } from './services/notificationService';
+import { useNotifications } from './hooks/useNotifications';
 
 function App() {
-  const [currentView, setCurrentView] = useState<ViewType>('coach');
+  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Cambiado a true para desktop por defecto
   const [isMobile, setIsMobile] = useState(false);
   const [goals, setGoals] = useState<Goal[]>(initialGoals);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error' | 'no-key'>('checking');
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  // Hook para manejar notificaciones automáticas
+  const { requestNotificationPermission, checkCompletedGoals, checkStuckGoals } = useNotifications(goals);
   const [messages, setMessages] = useState<ConversationMessage[]>([
     {
       role: 'user',
-      parts: [{ text: 'Inicia como mi coach estratégico BruTaL. Presenta tu método y dame un desafío inicial.' }]
+      parts: [{ text: 'Inicia como mi coach estratégico BRUTAL. Presenta tu método y dame UN SOLO desafío inicial.' }]
     },
     {
       role: 'model',
       parts: [{ text: JSON.stringify({
-        truth: 'La mayoría de los emprendedores fracasan por falta de enfoque estratégico, no por falta de esfuerzo. El 80% de tu tiempo probablemente se gasta en actividades que generan solo el 20% de tus resultados. Necesitas identificar tu punto de apalancamiento máximo.',
-        plan: [
-          'Define tu objetivo más crítico para las próximas 4 semanas. Uno solo, específico y medible.',
-          'Identifica las 3 actividades que más te alejan de ese objetivo y elimínalas esta semana.',
-          'Establece una métrica diaria que te permita medir tu progreso hacia ese objetivo.'
-        ],
-        challenge: '¿Cuál es la única cosa que, si la lograras en las próximas 4 semanas, haría que todo lo demás fuera más fácil o irrelevante? Debe ser específica, medible y con un plazo agresivo.',
+        truth: 'Soy BRUTAL, tu coach estratégico. Mi método es simple pero brutal: identifico tus puntos de apalancamiento máximo y te fuerzo a ejecutar sobre ellos. No me importa lo ocupado que estés; me importan los resultados que generas.',
+        plan: [],
+        challenge: '¿Cuál es el problema más crítico que estás enfrentando en este momento? Sé específico: números, fechas, resultados concretos.',
         suggestedResource: null,
         suggestionContext: null
       })}]
@@ -64,12 +70,31 @@ function App() {
       id: Date.now()
     };
     setGoals(prev => [...prev, goal]);
+    
+    // Generar notificación de nueva meta creada
+    const notification = notificationService.generateNewGoalNotification(goal);
+    notificationService.addNotification(notification);
+    updateNotificationCount();
   };
 
   const handleUpdateGoal = (goalId: number, updates: Partial<Goal>) => {
-    setGoals(prev => prev.map(goal => 
-      goal.id === goalId ? { ...goal, ...updates } : goal
-    ));
+    setGoals(prev => {
+      const updatedGoals = prev.map(goal => 
+        goal.id === goalId ? { ...goal, ...updates, lastUpdated: new Date() } : goal
+      );
+      
+      // Verificar si alguna meta se completó después de la actualización
+      setTimeout(() => {
+        const completedNotifications = checkCompletedGoals();
+        const stuckNotifications = checkStuckGoals();
+        
+        if (completedNotifications.length > 0 || stuckNotifications.length > 0) {
+          updateNotificationCount();
+        }
+      }, 100);
+      
+      return updatedGoals;
+    });
   };
 
   const handleSaveProfile = (data: { mission: string; values: string }) => {
@@ -85,10 +110,39 @@ function App() {
     }
   };
 
+  const handleNotificationsClick = () => {
+    setIsNotificationPanelOpen(true);
+  };
+
+  const handleNotificationPanelClose = () => {
+    setIsNotificationPanelOpen(false);
+    updateNotificationCount();
+  };
+
   useEffect(() => {
     aiService.setResources(resources);
     checkApiStatus();
+    initializeNotifications();
   }, []);
+
+  const initializeNotifications = () => {
+    // Cargar notificaciones iniciales si no existen
+    const existingNotifications = notificationService.getAllNotifications();
+    if (existingNotifications.length === 0) {
+      initialNotifications.forEach(notification => {
+        notificationService.addNotification(notification);
+      });
+    }
+    updateNotificationCount();
+    
+    // Solicitar permisos de notificación
+    requestNotificationPermission();
+  };
+
+  const updateNotificationCount = () => {
+    const unread = notificationService.getUnreadNotifications();
+    setUnreadNotificationsCount(unread.length);
+  };
 
   const checkApiStatus = async () => {
     setApiStatus('checking');
@@ -96,6 +150,7 @@ function App() {
       const status = await aiService.testConnection();
       setApiStatus(status);
     } catch (error) {
+      console.log('API check failed, setting status to error');
       setApiStatus('error');
     }
   };
@@ -130,12 +185,8 @@ function App() {
         role: 'model',
         parts: [{ text: JSON.stringify({
           truth: 'Error de comunicación con la IA. Pero eso no es excusa para no avanzar.',
-          plan: [
-            'Verifica tu conexión a internet',
-            'Asegúrate de que tu API Key de Gemini esté configurada correctamente',
-            'Mientras tanto, enfócate en lo que SÍ puedes controlar'
-          ],
-          challenge: '¿Qué acción específica puedes tomar HOY para avanzar hacia tu objetivo, independientemente de los problemas técnicos?',
+          plan: ['Verifica tu conexión a internet', 'Revisa la configuración de la API', 'Mientras tanto, enfócate en lo que SÍ puedes controlar'],
+          challenge: '¿Qué acción específica puedes tomar HOY para avanzar hacia tu objetivo?',
           suggestedResource: null,
           suggestionContext: null
         })}]
@@ -151,32 +202,26 @@ function App() {
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'coach':
+      case 'dashboard':
         return (
-          <CoachChat
-            resources={resources}
-            onResourceClick={() => {}}
-            onGoalSuggestion={(suggestedGoal) => {
-              const newGoal: Goal = {
-                id: Date.now(),
-                title: suggestedGoal.title,
-                metric: suggestedGoal.metric,
-                current: 0,
-                target: suggestedGoal.target,
-                unit: suggestedGoal.unit,
-                status: 'En Progreso'
-              };
-              setGoals(prev => [...prev, newGoal]);
-              setCurrentView('metas'); // Cambiar a la vista de metas para ver la nueva meta
-            }}
-            isLoading={isLoading}
-            apiStatus={apiStatus}
-            messages={messages}
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSendMessage={handleSendMessage}
+          <CoachDashboard
+            goals={goals}
+            onViewChange={handleViewChange}
           />
         );
+              case 'coach':
+          return (
+            <CoachChat
+              resources={resources}
+              onResourceClick={() => {}}
+              isLoading={isLoading}
+              apiStatus={apiStatus}
+              messages={messages}
+              inputValue={inputValue}
+              onInputChange={setInputValue}
+              onSendMessage={handleSendMessage}
+            />
+          );
       case 'metas':
         return (
           <GoalsView
@@ -217,51 +262,75 @@ function App() {
       <div className={`flex-1 flex flex-col transition-all duration-300 ease-out ${
         isSidebarOpen ? 'ml-80' : 'ml-0'
       }`}>
-        {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm flex-shrink-0" style={{ height: '60px' }}>
+                {/* Header fijo */}
+        <header className={`fixed top-0 z-50 flex items-center justify-between px-4 pt-4 pb-4 bg-slate-900/80 backdrop-blur-sm flex-shrink-0 transition-all duration-300 ease-out ${
+          isSidebarOpen && !isMobile ? 'left-80 right-0' : 'left-0 right-0'
+        }`} style={{ height: '60px' }}>
           <div className="flex items-center">
-            {/* Botón hamburguesa siempre visible */}
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="mr-3 flex flex-col justify-center items-center transition-colors"
-              style={{ width: '24px', height: '24px' }}
-            >
-              <div 
-                style={{ 
-                  width: '24px', 
-                  height: '2px', 
-                  backgroundColor: 'white', 
-                  marginBottom: '4px',
-                  borderRadius: '1px'
+            {/* Botón hamburguesa - visible en mobile y desktop cuando sidebar está cerrado */}
+            {!isSidebarOpen && (
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '8px',
+                  marginRight: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '6px'
                 }}
-              ></div>
-              <div 
-                style={{ 
-                  width: '24px', 
-                  height: '2px', 
-                  backgroundColor: 'white', 
-                  marginBottom: '4px',
-                  borderRadius: '1px'
-                }}
-              ></div>
-              <div 
-                style={{ 
-                  width: '24px', 
-                  height: '2px', 
-                  backgroundColor: 'white',
-                  borderRadius: '1px'
-                }}
-              ></div>
-            </button>
-            <h1 className="text-white text-2xl font-bold">Brutalytics</h1>
+              >
+                <div style={{ width: '18px', height: '2px', backgroundColor: '#3B82F6', marginBottom: '3px', borderRadius: '1px' }}></div>
+                <div style={{ width: '18px', height: '2px', backgroundColor: '#3B82F6', marginBottom: '3px', borderRadius: '1px' }}></div>
+                <div style={{ width: '18px', height: '2px', backgroundColor: '#3B82F6', borderRadius: '1px' }}></div>
+              </button>
+            )}
           </div>
         </header>
         
         {/* Content area */}
-        <div className="flex-1 relative" style={{ backgroundColor: 'transparent' }}>
+        <div className="flex-1 relative h-full pt-24" style={{ backgroundColor: 'transparent', height: 'calc(100vh - 60px)', overflow: 'hidden' }}>
           {renderCurrentView()}
         </div>
       </div>
+      
+      {/* Botón de notificaciones - siempre visible en la esquina superior derecha */}
+      <button
+        onClick={handleNotificationsClick}
+        className="absolute top-4 right-4 z-50 text-blue-600 hover:text-blue-700 transition-colors duration-200 bg-transparent border-none outline-none p-2 rounded-lg hover:bg-slate-700/40"
+        style={{ 
+          color: '#3B82F6',
+          position: 'absolute',
+          top: '1rem',
+          right: '1rem',
+          zIndex: 50
+        }}
+      >
+        <Bell className="w-6 h-6" />
+        {unreadNotificationsCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+            {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+          </span>
+        )}
+      </button>
+
+
+
+      {/* Notification Panel - Solo visible cuando está abierto */}
+      {isNotificationPanelOpen ? (
+        <NotificationPanel
+          isOpen={isNotificationPanelOpen}
+          onClose={handleNotificationPanelClose}
+          onViewChange={handleViewChange}
+          isMobile={isMobile}
+        />
+      ) : null}
     </div>
   );
 }

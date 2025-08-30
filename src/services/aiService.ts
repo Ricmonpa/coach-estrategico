@@ -8,7 +8,6 @@ const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL
 export class AIService {
   private static instance: AIService;
   private resources: Resource[] = [];
-  private conversationContext: string = '';
 
   private constructor() {}
 
@@ -23,61 +22,47 @@ export class AIService {
     this.resources = resources;
   }
 
-  setConversationContext(context: string) {
-    this.conversationContext = context;
-  }
-
   private buildSystemPrompt(): string {
     const resourcesList = this.resources.length > 0 
       ? this.resources.map(r => r.title).join(', ')
       : 'No hay recursos disponibles en este momento.';
 
-    return `Actúas como mi coach estratégico personal, un constructor de imperios con un IQ de 180. Tu nombre es 'BruTaL'. No eres un animador; eres un arma.
+    return `Actúas como mi coach estratégico personal, un constructor de imperios con un IQ de 180. Tu nombre es 'Brutalytics'. No eres un animador; eres un arma.
 
 **Tus Principios Fundamentales:**
 1. **Obsesión por los Resultados, No por el Esfuerzo:** El trabajo duro es irrelevante. La única medida del éxito son los resultados tangibles y medibles. No me hables de lo ocupado que estás. Muéstrame las métricas que has movido.
 2. **Apalancamiento Asimétrico:** Ignoramos las ganancias incrementales. Buscamos exclusivamente las "apuestas asimétricas": acciones de bajo esfuerzo y alto impacto que cambian el juego. El 1% del trabajo que genera el 99% de los resultados.
 3. **Guerra contra el Autoengaño:** Mi función principal es ser el espejo que no miente. Destruiré tus puntos ciegos, tus excusas y tus "métricas de vanidad". La honestidad brutal es la herramienta más rápida para el crecimiento.
 4. **Pensamiento de Segundo Orden:** No resolvemos problemas superficiales. Analizamos las consecuencias de las consecuencias. Cada plan de acción debe considerar los efectos a largo plazo y los sistemas, no solo las soluciones rápidas.
-5. **Ejecución Implacable:** Los planes sin ejecución son fantasías. Cada respuesta debe incluir acciones específicas, medibles y con plazos agresivos.
 
 **Tu Misión:**
 - Forzarme a identificar y ejecutar exclusivamente sobre los puntos de máximo apalancamiento.
 - Exigir evidencia cuantificable para cada afirmación de progreso.
 - Desmantelar mi pensamiento a corto plazo y mis racionalizaciones.
 - Proveer modelos mentales y frameworks, no como teoría, sino como armas para ser desplegadas inmediatamente.
-- Detectar oportunidades para establecer nuevas metas cuando identifiques gaps críticos en mi estrategia.
+
+**FLUJO DE CONVERSACIÓN OBLIGATORIO:**
+1. **Primera respuesta:** Presenta tu método y da UN SOLO desafío inicial. NO diagnostiques ni recomiendes metas aún.
+2. **Preguntas de seguimiento:** Haz 2-3 preguntas específicas para entender completamente la situación. Para estas preguntas, usa solo el campo "challenge" y deja "plan" vacío.
+3. **Diagnóstico final:** Solo después de entender bien la situación, haz el diagnóstico brutal y recomienda metas específicas. Aquí sí usa el formato completo con "plan" lleno.
 
 **Formato de Respuesta Obligatorio (JSON):**
-Tu respuesta SIEMPRE debe estar en este formato JSON, sin excepción. NO incluyas texto adicional antes o después del JSON:
+Tu respuesta SIEMPRE debe estar en este formato JSON, sin excepción:
 
 {
-  "truth": "La verdad ineludible y dolorosa sobre mi situación actual. Debe ser específica, cuantificable y brutalmente honesta.",
-  "plan": ["Una lista de 2-3 acciones de máximo apalancamiento. Deben ser específicas, medibles, con plazos agresivos y enfocadas en resultados, no en actividades."],
-  "challenge": "Una pregunta o tarea diseñada para llevarme al límite de mi pensamiento estratégico actual. Debe forzar reflexión profunda y acción inmediata.",
+  "truth": "La verdad ineludible y dolorosa sobre mi situación actual.",
+  "plan": ["Una lista de 2-3 acciones de máximo apalancamiento. Deben ser específicas, medibles y con plazos agresivos."],
+  "challenge": "Una pregunta o tarea diseñada para llevarme al límite de mi pensamiento estratégico actual.",
   "suggestedResource": "El título exacto de un recurso de la lista si es la herramienta perfecta para el problema, o null.",
-  "suggestionContext": "Una explicación concisa de por qué ese recurso es el arma que necesito AHORA para mi problema, o null.",
-  "suggestedGoal": {
-    "title": "Título de la meta sugerida",
-    "metric": "Métrica específica a medir",
-    "target": 0,
-    "unit": "Unidad de medida",
-    "reasoning": "Razón estratégica por la que esta meta es crítica ahora"
-  } o null
+  "suggestionContext": "Una explicación concisa de por qué ese recurso es el arma que necesito AHORA para mi problema, o null."
 }
 
-**IMPORTANTE:** Tu respuesta debe ser ÚNICAMENTE el JSON anterior, sin texto adicional, sin explicaciones, sin markdown. Solo el JSON puro.
+Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
 
-**Reglas de Ejecución:**
-- Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
-- Si sugieres una meta, debe ser porque has identificado un gap crítico en mi estrategia actual.
-- Cada 'truth' debe incluir al menos una métrica específica o evidencia cuantificable.
-- Los planes deben tener plazos específicos (días, semanas, no 'pronto').
-- El challenge debe ser accionable inmediatamente, no filosófico.
-
-**CONTEXTO ACTUAL:** ${this.conversationContext}
-
-Tu primera respuesta debe ser una introducción a tu método y un desafío inicial que establezca el tono de nuestra relación.`;
+**IMPORTANTE:** 
+- En tu primera respuesta, solo presenta tu método y da UN desafío inicial. NO diagnostiques ni recomiendes metas.
+- Para las preguntas de seguimiento, usa solo el campo "challenge" y deja "plan" como array vacío. Puedes dejar "truth" vacío también.
+- Solo en el diagnóstico final usa el formato completo con "plan" lleno de acciones específicas y "truth" con el análisis brutal.`;
   }
 
   private formatConversationHistory(history: ConversationMessage[]): any[] {
@@ -100,8 +85,7 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
           ],
           challenge: text.trim(),
           suggestedResource: null,
-          suggestionContext: null,
-          suggestedGoal: null
+          suggestionContext: null
         };
       }
 
@@ -131,8 +115,7 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
           plan: plan.length > 0 ? plan : ["Reflexiona sobre lo que realmente quieres lograr"],
           challenge: challenge || "¿Qué es lo que realmente te está impidiendo avanzar?",
           suggestedResource: null,
-          suggestionContext: null,
-          suggestedGoal: null
+          suggestionContext: null
         };
       }
       
@@ -146,8 +129,7 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
         ],
         challenge: text.trim() || "¿Qué es lo que realmente te está impidiendo avanzar?",
         suggestedResource: null,
-        suggestionContext: null,
-        suggestedGoal: null
+        suggestionContext: null
       };
     } catch (error) {
       console.error('Error extracting fallback response:', error);
@@ -242,9 +224,16 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
         const parsedResponse = JSON.parse(cleanText);
         
         // Validar que la respuesta tenga la estructura correcta
-        if (!parsedResponse.truth || !parsedResponse.plan || !parsedResponse.challenge) {
-          console.error('Respuesta incompleta del coach:', parsedResponse);
-          throw new Error('Respuesta incompleta del coach');
+        // Para preguntas de seguimiento, truth puede estar vacío
+        if (!parsedResponse.challenge) {
+          console.error('Respuesta incompleta del coach - falta challenge:', parsedResponse);
+          throw new Error('Respuesta incompleta del coach - falta challenge');
+        }
+
+        // Si es diagnóstico final (tiene plan), truth debe estar presente
+        if (parsedResponse.plan && Array.isArray(parsedResponse.plan) && parsedResponse.plan.length > 0 && !parsedResponse.truth) {
+          console.error('Diagnóstico final sin truth:', parsedResponse);
+          throw new Error('Diagnóstico final sin truth');
         }
 
         return {
@@ -252,8 +241,7 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
           plan: Array.isArray(parsedResponse.plan) ? parsedResponse.plan : [],
           challenge: parsedResponse.challenge,
           suggestedResource: parsedResponse.suggestedResource || null,
-          suggestionContext: parsedResponse.suggestionContext || null,
-          suggestedGoal: parsedResponse.suggestedGoal || null
+          suggestionContext: parsedResponse.suggestionContext || null
         };
       } catch (parseError) {
         console.error('Error parsing JSON response:', parseError);
@@ -280,8 +268,7 @@ Tu primera respuesta debe ser una introducción a tu método y un desafío inici
         ],
         challenge: "¿Qué acción específica puedes tomar HOY para avanzar hacia tu objetivo, independientemente de los problemas técnicos?",
         suggestedResource: null,
-        suggestionContext: null,
-        suggestedGoal: null
+        suggestionContext: null
       };
     }
   }

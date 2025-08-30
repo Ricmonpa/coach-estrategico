@@ -1,23 +1,48 @@
-import type { Goal, Resource } from '../types/index';
+import type { Goal, Resource, Notification, CoachReminder } from '../types/index';
 
 export const initialGoals: Goal[] = [
   {
     id: 1,
-    title: 'Cerrar Ronda Serie A',
-    metric: 'Capital Recaudado',
-    current: 1200000,
-    target: 5000000,
-    unit: '$',
-    status: 'En Progreso'
-  },
-  {
-    id: 2,
     title: 'Incrementar MRR',
     metric: 'Ingreso Mensual Recurrente',
     current: 75000,
     target: 100000,
     unit: '$',
-    status: 'En Progreso'
+    status: 'En Progreso',
+    createdAt: new Date('2024-01-01'),
+    deadline: new Date('2024-12-31'),
+    lastUpdated: new Date(),
+    progressHistory: [
+      { date: new Date('2024-01-01'), value: 50000 },
+      { date: new Date('2024-02-01'), value: 65000 },
+      { date: new Date('2024-03-01'), value: 75000 }
+    ],
+    reminderFrequency: 'daily',
+    nextReminder: new Date(Date.now() + 24 * 60 * 60 * 1000)
+  }
+];
+
+export const initialNotifications: Notification[] = [
+  {
+    id: '1',
+    type: 'achievement',
+    title: '¡Excelente progreso en MRR!',
+    message: 'Has incrementado tu MRR de $50K a $75K. ¡Estás a solo $25K de tu meta! ¿Qué estrategia te está funcionando mejor?',
+    goalId: 1,
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    isRead: true,
+    actionRequired: false,
+    priority: 'medium'
+  }
+];
+
+export const initialReminders: CoachReminder[] = [
+  {
+    id: '1',
+    goalId: 1,
+    message: '¡Hoy es un buen día para revisar tu estrategia de retención de clientes! ¿Qué puedes hacer para aumentar el MRR?',
+    scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    isCompleted: false
   }
 ];
 

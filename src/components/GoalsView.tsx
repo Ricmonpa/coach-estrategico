@@ -92,7 +92,12 @@ const GoalsView = ({ goals, onAddGoal, onUpdateGoal }: GoalsViewProps) => {
       current: 0,
       target: parseFloat(formData.target),
       unit: formData.unit,
-      status: 'En Progreso'
+      status: 'En Progreso',
+      createdAt: new Date(),
+      lastUpdated: new Date(),
+      progressHistory: [],
+      reminderFrequency: 'weekly',
+      nextReminder: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     });
     setFormData({ title: '', metric: '', target: '', unit: '' });
     setShowModal(false);
