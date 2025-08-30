@@ -159,31 +159,26 @@ export class NotificationService {
     const progress = (goal.current / goal.target) * 100;
 
     let messages: string[];
-    let motivationType: 'encouragement' | 'challenge' | 'reflection' | 'celebration' | 'urgent';
 
     if (needsUrgent) {
-      motivationType = 'urgent';
       messages = [
         `🚨 URGENTE: ${goal.title} necesita atención inmediata. ¿Qué estás haciendo HOY para avanzar?`,
         `⚠️ ALERTA: ${goal.title} está en riesgo. ¿Cuál es tu plan de acción para los próximos 3 días?`,
         `🔥 CRÍTICO: ${goal.title} requiere acción inmediata. ¿Qué obstáculo vas a eliminar hoy?`
       ];
     } else if (isStuck) {
-      motivationType = 'challenge';
       messages = [
         `💪 ¿Estás desafiándote lo suficiente con ${goal.title}? A veces necesitamos salir de nuestra zona de confort.`,
         `🎯 ¿Qué obstáculo te está impidiendo avanzar más rápido en ${goal.title}?`,
         `⚡ ¿Has considerado todas las opciones para acelerar ${goal.title}?`
       ];
     } else if (progress >= 80) {
-      motivationType = 'celebration';
       messages = [
         `🎉 ¡Excelente trabajo en ${goal.title}! ¿Qué te gustaría celebrar hoy?`,
         `🏆 Has hecho un progreso significativo en ${goal.title}. ¿Qué te hace sentir más orgulloso?`,
         `⭐ ¡Bien hecho! ${goal.title} está avanzando. ¿Qué estrategia te está funcionando mejor?`
       ];
     } else {
-      motivationType = 'encouragement';
       messages = [
         `💪 ¿Cómo va el progreso con ${goal.title}? Recuerda que cada pequeño paso cuenta.`,
         `🚀 ¡Hoy es un buen día para avanzar en ${goal.title}! ¿Qué puedes hacer diferente?`,
@@ -198,8 +193,7 @@ export class NotificationService {
       goalId: goal.id,
       message: selectedMessage,
       scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000), // Mañana
-      isCompleted: false,
-      motivationType
+      isCompleted: false
     };
   }
 
