@@ -160,7 +160,7 @@ const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages,
   };
 
   // Función para determinar si es un mensaje de diagnóstico final
-  const isDiagnosticMessage = (response: any, messageIndex: number) => {
+  const isDiagnosticMessage = (response: any) => {
     // Es diagnóstico final si tiene plan de acción con elementos específicos
     return response.plan && 
            Array.isArray(response.plan) && 
@@ -194,7 +194,7 @@ const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages,
         
         if (response.challenge) {
           // Si es diagnóstico final (tiene plan de acción), mostrar formato estructurado
-          if (isDiagnosticMessage(response, index)) {
+          if (isDiagnosticMessage(response)) {
             return (
               <div key={index} className="animate-fade-in">
                 {renderCoachResponse(response)}

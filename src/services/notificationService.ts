@@ -198,7 +198,7 @@ export class NotificationService {
       goalId: goal.id,
       message: selectedMessage,
       scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000), // Mañana
-      sent: false,
+      isCompleted: false,
       motivationType
     };
   }
@@ -236,14 +236,14 @@ export class NotificationService {
 
   // Obtener notificaciones no leídas
   getUnreadNotifications(): Notification[] {
-    return this.notifications.filter(n => !n.read);
+    return this.notifications.filter(n => !n.isRead);
   }
 
   // Marcar notificación como leída
   markAsRead(notificationId: string): void {
     const notification = this.notifications.find(n => n.id === notificationId);
     if (notification) {
-      notification.read = true;
+      notification.isRead = true;
       this.saveNotifications();
     }
   }
