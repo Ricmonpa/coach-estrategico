@@ -1,11 +1,12 @@
 import { useRef, useEffect } from 'react';
 import { AlertCircle, SendHorizontal } from 'lucide-react';
-import type { CoachResponse, ConversationMessage, Resource } from '../types/index';
+import type { CoachResponse, ConversationMessage, Resource, Goal } from '../types/index';
 import aiService from '../services/aiService';
 
 interface CoachChatProps {
   resources: Resource[];
   onResourceClick: (resource: Resource) => void;
+  onCreateGoal?: (goal: Omit<Goal, 'id'>) => void;
   isLoading: boolean;
   apiStatus: 'checking' | 'connected' | 'error' | 'no-key';
   messages: ConversationMessage[];
@@ -14,7 +15,7 @@ interface CoachChatProps {
   onSendMessage: () => void;
 }
 
-const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages, inputValue, onInputChange, onSendMessage }: CoachChatProps) => {
+const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiStatus, messages, inputValue, onInputChange, onSendMessage }: CoachChatProps) => {
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -137,6 +138,54 @@ const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages,
       }
     }
 
+    // Función para extraer información de la meta
+    const extractGoalFromMeta = (metaText: string): Omit<Goal, 'id'> | null => {
+      try {
+        // Buscar patrones comunes en las metas
+        const amountMatch = metaText.match(/(\d+(?:,\d+)?)\s*(USD|MXN|pesos?|dólares?)/i);
+        const timeMatch = metaText.match(/(\d+)\s*(semanas?|días?|meses?)/i);
+        
+        if (amountMatch && timeMatch) {
+          const amount = parseFloat(amountMatch[1].replace(',', ''));
+          const currency = amountMatch[2].toUpperCase();
+          const timeValue = parseInt(timeMatch[1]);
+          const timeUnit = timeMatch[2].toLowerCase();
+          
+          // Calcular fecha límite
+          const deadline = new Date();
+          if (timeUnit.includes('semana')) {
+            deadline.setDate(deadline.getDate() + (timeValue * 7));
+          } else if (timeUnit.includes('día')) {
+            deadline.setDate(deadline.getDate() + timeValue);
+          } else if (timeUnit.includes('mes')) {
+            deadline.setMonth(deadline.getMonth() + timeValue);
+          }
+          
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: `Ingresos (${currency})`,
+            current: 0,
+            target: amount,
+            unit: currency,
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: deadline
+          };
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('Error extracting goal from meta:', error);
+        return null;
+      }
+    };
+
+    const goalData = response.meta ? extractGoalFromMeta(response.meta) : null;
+
     return (
       <div className="animate-fade-in">
         <div className="simple-chat-bubble">
@@ -151,6 +200,22 @@ const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages,
             </ul>
             <br />
             <p><strong>TU RETO:</strong> {response.challenge}</p>
+            {response.meta && (
+              <>
+                <br />
+                <p><strong>META:</strong> {response.meta}</p>
+                {goalData && onCreateGoal && (
+                  <div className="mt-4 pt-4 border-t border-slate-700/50">
+                    <button
+                      onClick={() => onCreateGoal(goalData)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium"
+                    >
+                      📊 Crear Meta Automáticamente
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
         
@@ -161,11 +226,16 @@ const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages,
 
   // Función para determinar si es un mensaje de diagnóstico final
   const isDiagnosticMessage = (response: any) => {
-    // Es diagnóstico final si tiene plan de acción con elementos específicos
+    // Es diagnóstico final si tiene plan de acción con elementos específicos Y truth no está vacío
+    // Y además tiene meta (que indica que es el diagnóstico final)
     return response.plan && 
            Array.isArray(response.plan) && 
            response.plan.length > 0 && 
-           response.plan.some((item: string) => item.trim().length > 0);
+           response.plan.some((item: string) => item.trim().length > 0) &&
+           response.truth && 
+           response.truth.trim().length > 0 &&
+           response.meta &&
+           response.meta.trim().length > 0;
   };
 
   // Función para renderizar mensaje simple del coach
@@ -193,7 +263,7 @@ const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages,
         const response = JSON.parse(message.parts[0].text);
         
         if (response.challenge) {
-          // Si es diagnóstico final (tiene plan de acción), mostrar formato estructurado
+          // Si es diagnóstico final (tiene plan de acción, truth y meta), mostrar formato estructurado
           if (isDiagnosticMessage(response)) {
             return (
               <div key={index} className="animate-fade-in">
@@ -202,6 +272,7 @@ const CoachChat = ({ resources, onResourceClick, isLoading, apiStatus, messages,
             );
           } else {
             // Si es pregunta de seguimiento, mostrar solo el challenge como mensaje simple
+            // pero con un estilo más conversacional
             return (
               <div key={index} className="animate-fade-in">
                 {renderSimpleCoachMessage(response.challenge)}

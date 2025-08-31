@@ -28,6 +28,7 @@ export interface CoachResponse {
   challenge: string;
   suggestedResource: string | null;
   suggestionContext: string | null;
+  meta?: string;
 }
 
 export interface ConversationMessage {

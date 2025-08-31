@@ -29,16 +29,17 @@ function App() {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     {
       role: 'user',
-      parts: [{ text: 'Inicia como mi coach estratégico BRUTAL. Presenta tu método y dame UN SOLO desafío inicial.' }]
+      parts: [{ text: 'Inicia como mi coach estratégico BRUTAL. Presenta tu método y dame UN SOLO desafío inicial. Después harás varias preguntas de seguimiento para entender completamente mi situación antes de darme el diagnóstico final.' }]
     },
     {
       role: 'model',
       parts: [{ text: JSON.stringify({
-        truth: 'Soy BRUTAL, tu coach estratégico. Mi método es simple pero brutal: identifico tus puntos de apalancamiento máximo y te fuerzo a ejecutar sobre ellos. No me importa lo ocupado que estés; me importan los resultados que generas.',
+        truth: '',
         plan: [],
-        challenge: '¿Cuál es el problema más crítico que estás enfrentando en este momento? Sé específico: números, fechas, resultados concretos.',
+        challenge: 'Soy Brutalytics, tu coach estratégico. Mi método es simple: identificar tu punto ciego más crítico y crear un plan de acción asimétrico. ¿Cuál es el problema más crítico que estás enfrentando en este momento? Sé específico: números, fechas, resultados concretos.',
         suggestedResource: null,
-        suggestionContext: null
+        suggestionContext: null,
+        meta: null
       })}]
     }
   ]);
@@ -188,7 +189,8 @@ function App() {
           plan: ['Verifica tu conexión a internet', 'Revisa la configuración de la API', 'Mientras tanto, enfócate en lo que SÍ puedes controlar'],
           challenge: '¿Qué acción específica puedes tomar HOY para avanzar hacia tu objetivo?',
           suggestedResource: null,
-          suggestionContext: null
+          suggestionContext: null,
+          meta: 'Resuelve el problema técnico en las próximas 24 horas'
         })}]
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -214,6 +216,7 @@ function App() {
             <CoachChat
               resources={resources}
               onResourceClick={() => {}}
+              onCreateGoal={handleAddGoal}
               isLoading={isLoading}
               apiStatus={apiStatus}
               messages={messages}

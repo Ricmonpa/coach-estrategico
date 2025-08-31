@@ -22,7 +22,11 @@ export class AIService {
     this.resources = resources;
   }
 
-  private buildSystemPrompt(): string {
+  private buildSystemPrompt(conversationContext?: {
+    userMessagesCount: number;
+    hasEnoughContext: boolean;
+    keyTopicsCovered: string[];
+  }): string {
     const resourcesList = this.resources.length > 0 
       ? this.resources.map(r => r.title).join(', ')
       : 'No hay recursos disponibles en este momento.';
@@ -30,21 +34,28 @@ export class AIService {
     return `Actúas como mi coach estratégico personal, un constructor de imperios con un IQ de 180. Tu nombre es 'Brutalytics'. No eres un animador; eres un arma.
 
 **Tus Principios Fundamentales:**
-1. **Obsesión por los Resultados, No por el Esfuerzo:** El trabajo duro es irrelevante. La única medida del éxito son los resultados tangibles y medibles. No me hables de lo ocupado que estás. Muéstrame las métricas que has movido.
-2. **Apalancamiento Asimétrico:** Ignoramos las ganancias incrementales. Buscamos exclusivamente las "apuestas asimétricas": acciones de bajo esfuerzo y alto impacto que cambian el juego. El 1% del trabajo que genera el 99% de los resultados.
-3. **Guerra contra el Autoengaño:** Mi función principal es ser el espejo que no miente. Destruiré tus puntos ciegos, tus excusas y tus "métricas de vanidad". La honestidad brutal es la herramienta más rápida para el crecimiento.
-4. **Pensamiento de Segundo Orden:** No resolvemos problemas superficiales. Analizamos las consecuencias de las consecuencias. Cada plan de acción debe considerar los efectos a largo plazo y los sistemas, no solo las soluciones rápidas.
+1. **Obsesión por los Resultados, No por el Esfuerzo:** El trabajo duro es irrelevante. La única medida del éxito son los resultados tangibles y medibles.
+2. **Apalancamiento Asimétrico:** Ignoramos las ganancias incrementales. Buscamos exclusivamente las "apuestas asimétricas": acciones de bajo esfuerzo y alto impacto.
+3. **Guerra contra el Autoengaño:** Mi función principal es ser el espejo que no miente. Destruiré tus puntos ciegos y excusas.
+4. **Pensamiento de Segundo Orden:** No resolvemos problemas superficiales. Analizamos las consecuencias de las consecuencias.
 
-**Tu Misión:**
-- Forzarme a identificar y ejecutar exclusivamente sobre los puntos de máximo apalancamiento.
-- Exigir evidencia cuantificable para cada afirmación de progreso.
-- Desmantelar mi pensamiento a corto plazo y mis racionalizaciones.
-- Proveer modelos mentales y frameworks, no como teoría, sino como armas para ser desplegadas inmediatamente.
+**REGLAS CRÍTICAS DE COMUNICACIÓN:**
+- **SÉ CONCISO:** Máximo 2-3 frases por sección. Menos es más.
+- **SIN REPETICIONES:** No uses el formato "Verdad Dura + Plan + Reto" en cada respuesta.
+- **META SIEMPRE:** Al final del diagnóstico, SIEMPRE incluye una meta cuantitativa con fecha específica.
 
 **FLUJO DE CONVERSACIÓN OBLIGATORIO:**
 1. **Primera respuesta:** Presenta tu método y da UN SOLO desafío inicial. NO diagnostiques ni recomiendes metas aún.
-2. **Preguntas de seguimiento:** Haz 2-3 preguntas específicas para entender completamente la situación. Para estas preguntas, usa solo el campo "challenge" y deja "plan" vacío.
-3. **Diagnóstico final:** Solo después de entender bien la situación, haz el diagnóstico brutal y recomienda metas específicas. Aquí sí usa el formato completo con "plan" lleno.
+2. **Preguntas de seguimiento:** Haz 3-5 preguntas específicas y profundas para entender completamente la situación. Para estas preguntas, usa solo el campo "challenge" y deja "plan" vacío.
+3. **Diagnóstico final:** Solo después de tener suficiente contexto (mínimo 3-4 intercambios), haz el diagnóstico brutal y recomienda metas específicas. Aquí sí usa el formato completo con "plan" lleno Y SIEMPRE incluye una "meta" cuantitativa.
+
+**CRITERIOS PARA DIAGNÓSTICO FINAL:**
+Solo da el diagnóstico final cuando tengas:
+- Entendimiento claro del problema principal
+- Contexto sobre recursos disponibles (tiempo, dinero, habilidades)
+- Información sobre intentos previos y resultados
+- Comprensión de las limitaciones reales vs excusas
+- Visión clara del objetivo deseado
 
 **Formato de Respuesta Obligatorio (JSON):**
 Tu respuesta SIEMPRE debe estar en este formato JSON, sin excepción:
@@ -54,7 +65,8 @@ Tu respuesta SIEMPRE debe estar en este formato JSON, sin excepción:
   "plan": ["Una lista de 2-3 acciones de máximo apalancamiento. Deben ser específicas, medibles y con plazos agresivos."],
   "challenge": "Una pregunta o tarea diseñada para llevarme al límite de mi pensamiento estratégico actual.",
   "suggestedResource": "El título exacto de un recurso de la lista si es la herramienta perfecta para el problema, o null.",
-  "suggestionContext": "Una explicación concisa de por qué ese recurso es el arma que necesito AHORA para mi problema, o null."
+  "suggestionContext": "Una explicación concisa de por qué ese recurso es el arma que necesito AHORA para mi problema, o null.",
+  "meta": "Meta cuantitativa específica con fecha límite. Ejemplo: 'Genera $5,000 MXN en las próximas 3 semanas con suscripciones de tu coach estratégico'"
 }
 
 Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
@@ -62,7 +74,20 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
 **IMPORTANTE:** 
 - En tu primera respuesta, solo presenta tu método y da UN desafío inicial. NO diagnostiques ni recomiendes metas.
 - Para las preguntas de seguimiento, usa solo el campo "challenge" y deja "plan" como array vacío. Puedes dejar "truth" vacío también.
-- Solo en el diagnóstico final usa el formato completo con "plan" lleno de acciones específicas y "truth" con el análisis brutal.`;
+- Solo en el diagnóstico final usa el formato completo con "plan" lleno de acciones específicas, "truth" con el análisis brutal, Y SIEMPRE incluye "meta" con una meta cuantitativa específica con fecha límite.
+- SÉ BRUTALMENTE CONCISO. No más de 2-3 frases por sección.
+- HAZ MÁS PREGUNTAS DE SEGUIMIENTO. No te apresures al diagnóstico.
+
+${conversationContext ? `
+**CONTEXTO ACTUAL DE LA CONVERSACIÓN:**
+- Mensajes del usuario: ${conversationContext.userMessagesCount}
+- Temas cubiertos: ${conversationContext.keyTopicsCovered.join(', ')}
+- ¿Suficiente contexto para diagnóstico?: ${conversationContext.hasEnoughContext ? 'SÍ' : 'NO'}
+
+${conversationContext.hasEnoughContext ? 
+  'TIENES SUFICIENTE CONTEXTO. Es momento de dar el diagnóstico final con plan de acción y meta específica.' : 
+  'AÚN NECESITAS MÁS CONTEXTO. Continúa haciendo preguntas de seguimiento específicas.'
+}` : ''}`;
   }
 
   private formatConversationHistory(history: ConversationMessage[]): any[] {
@@ -70,6 +95,46 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
       role: message.role === 'user' ? 'user' : 'model',
       parts: message.parts.map(part => ({ text: part.text }))
     }));
+  }
+
+  private analyzeConversationContext(history: ConversationMessage[]): {
+    userMessagesCount: number;
+    hasEnoughContext: boolean;
+    keyTopicsCovered: string[];
+  } {
+    const userMessages = history.filter(msg => msg.role === 'user');
+    const userMessagesCount = userMessages.length;
+    
+    // Extraer temas clave de las respuestas del usuario
+    const keyTopicsCovered: string[] = [];
+    const userTexts = userMessages.map(msg => msg.parts[0].text.toLowerCase());
+    
+    // Detectar temas clave basados en palabras clave
+    const topics = {
+      'problema_principal': ['problema', 'obstáculo', 'bloqueo', 'dificultad', 'retroceso'],
+      'recursos': ['dinero', 'tiempo', 'habilidades', 'conexiones', 'herramientas'],
+      'intentos_previos': ['intenté', 'probé', 'hice', 'implementé', 'falló'],
+      'objetivo': ['quiero', 'meta', 'objetivo', 'lograr', 'alcanzar'],
+      'limitaciones': ['no puedo', 'no tengo', 'es difícil', 'imposible', 'no sé']
+    };
+    
+    Object.entries(topics).forEach(([topic, keywords]) => {
+      const hasTopic = userTexts.some(text => 
+        keywords.some(keyword => text.includes(keyword))
+      );
+      if (hasTopic) {
+        keyTopicsCovered.push(topic);
+      }
+    });
+    
+    // Determinar si hay suficiente contexto para el diagnóstico final
+    const hasEnoughContext = userMessagesCount >= 3 && keyTopicsCovered.length >= 3;
+    
+    return {
+      userMessagesCount,
+      hasEnoughContext,
+      keyTopicsCovered
+    };
   }
 
   private extractFallbackResponse(text: string): CoachResponse | null {
@@ -85,7 +150,8 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
           ],
           challenge: text.trim(),
           suggestedResource: null,
-          suggestionContext: null
+          suggestionContext: null,
+          meta: "Resuelve el problema técnico en las próximas 24 horas"
         };
       }
 
@@ -95,6 +161,7 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
       let truth = '';
       let plan: string[] = [];
       let challenge = '';
+      let meta = '';
       
       for (const line of lines) {
         const lowerLine = line.toLowerCase();
@@ -105,6 +172,8 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
           if (action) plan.push(action);
         } else if (lowerLine.includes('desafío') || lowerLine.includes('challenge') || lowerLine.includes('reto')) {
           challenge = line.replace(/^.*?[:=]\s*/, '').trim();
+        } else if (lowerLine.includes('meta') || lowerLine.includes('objetivo')) {
+          meta = line.replace(/^.*?[:=]\s*/, '').trim();
         }
       }
       
@@ -115,7 +184,8 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
           plan: plan.length > 0 ? plan : ["Reflexiona sobre lo que realmente quieres lograr"],
           challenge: challenge || "¿Qué es lo que realmente te está impidiendo avanzar?",
           suggestedResource: null,
-          suggestionContext: null
+          suggestionContext: null,
+          meta: meta || "Define una meta específica en las próximas 24 horas"
         };
       }
       
@@ -129,7 +199,8 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
         ],
         challenge: text.trim() || "¿Qué es lo que realmente te está impidiendo avanzar?",
         suggestedResource: null,
-        suggestionContext: null
+        suggestionContext: null,
+        meta: "Resuelve el problema técnico en las próximas 24 horas"
       };
     } catch (error) {
       console.error('Error extracting fallback response:', error);
@@ -142,7 +213,11 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
       throw new Error('API Key de Gemini no configurada. Configura VITE_GEMINI_API_KEY en tu archivo .env');
     }
 
-    const systemPrompt = this.buildSystemPrompt();
+    // Analizar el contexto de la conversación para determinar si es momento del diagnóstico final
+    const conversationContext = this.analyzeConversationContext(conversationHistory);
+    
+    // Construir el prompt del sistema con información del contexto
+    const systemPrompt = this.buildSystemPrompt(conversationContext);
     const formattedHistory = this.formatConversationHistory(conversationHistory);
 
     const payload = {
@@ -241,7 +316,8 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
           plan: Array.isArray(parsedResponse.plan) ? parsedResponse.plan : [],
           challenge: parsedResponse.challenge,
           suggestedResource: parsedResponse.suggestedResource || null,
-          suggestionContext: parsedResponse.suggestionContext || null
+          suggestionContext: parsedResponse.suggestionContext || null,
+          meta: parsedResponse.meta || null
         };
       } catch (parseError) {
         console.error('Error parsing JSON response:', parseError);
@@ -268,7 +344,8 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
         ],
         challenge: "¿Qué acción específica puedes tomar HOY para avanzar hacia tu objetivo, independientemente de los problemas técnicos?",
         suggestedResource: null,
-        suggestionContext: null
+        suggestionContext: null,
+        meta: "Resuelve el problema técnico en las próximas 24 horas"
       };
     }
   }
