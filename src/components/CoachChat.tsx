@@ -141,18 +141,21 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
     // Función para extraer información de la meta
     const extractGoalFromMeta = (metaText: string): Omit<Goal, 'id'> | null => {
       try {
-        // Buscar patrones comunes en las metas
+        // Buscar patrones de dinero
         const amountMatch = metaText.match(/(\d+(?:,\d+)?)\s*(USD|MXN|pesos?|dólares?)/i);
         const timeMatch = metaText.match(/(\d+)\s*(semanas?|días?|meses?)/i);
         
-        if (amountMatch && timeMatch) {
-          const amount = parseFloat(amountMatch[1].replace(',', ''));
-          const currency = amountMatch[2].toUpperCase();
+        // Buscar patrones de usuarios/comentarios
+        const usersMatch = metaText.match(/(\d+)\s*usuarios?/i);
+        const commentsMatch = metaText.match(/(\d+)\s*comentarios?/i);
+        
+        // Calcular fecha límite si hay tiempo especificado
+        let deadline: Date | undefined;
+        if (timeMatch) {
           const timeValue = parseInt(timeMatch[1]);
           const timeUnit = timeMatch[2].toLowerCase();
+          deadline = new Date();
           
-          // Calcular fecha límite
-          const deadline = new Date();
           if (timeUnit.includes('semana')) {
             deadline.setDate(deadline.getDate() + (timeValue * 7));
           } else if (timeUnit.includes('día')) {
@@ -160,6 +163,12 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
           } else if (timeUnit.includes('mes')) {
             deadline.setMonth(deadline.getMonth() + timeValue);
           }
+        }
+        
+        // Si es meta de dinero
+        if (amountMatch && timeMatch) {
+          const amount = parseFloat(amountMatch[1].replace(',', ''));
+          const currency = amountMatch[2].toUpperCase();
           
           return {
             title: `Meta del Coach: ${metaText}`,
@@ -167,6 +176,62 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
             current: 0,
             target: amount,
             unit: currency,
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: deadline
+          };
+        }
+        
+        // Si es meta de usuarios
+        if (usersMatch) {
+          const userCount = parseInt(usersMatch[1]);
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: 'Usuarios Registrados',
+            current: 0,
+            target: userCount,
+            unit: 'usuarios',
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: deadline
+          };
+        }
+        
+        // Si es meta de comentarios
+        if (commentsMatch) {
+          const commentCount = parseInt(commentsMatch[1]);
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: 'Comentarios de Usuarios',
+            current: 0,
+            target: commentCount,
+            unit: 'comentarios',
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: deadline
+          };
+        }
+        
+        // Meta genérica si no coincide con patrones específicos
+        if (timeMatch) {
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: 'Progreso',
+            current: 0,
+            target: 100,
+            unit: '%',
             status: 'En Progreso',
             createdAt: new Date(),
             lastUpdated: new Date(),
@@ -208,7 +273,7 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
                   <div className="mt-4 pt-4 border-t border-slate-700/50">
                     <button
                       onClick={() => onCreateGoal(goalData)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-2xl transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-full transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                       📊 Crear Meta Automáticamente
                     </button>
