@@ -97,7 +97,7 @@ const CoachDashboard: React.FC<CoachDashboardProps> = ({ goals, onViewChange }) 
       <div className="max-w-4xl mx-auto" style={{ marginTop: '120px' }}>
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-3">Dashboard de Mando</h1>
+          <h1 className="text-4xl font-bold text-white mb-3">Dashboard Brutal</h1>
           <p className="text-gray-400 text-lg">Resumen del campo de batalla estratégico.</p>
         </div>
 
@@ -241,7 +241,7 @@ const CoachDashboard: React.FC<CoachDashboardProps> = ({ goals, onViewChange }) 
                     {/* Update Button */}
                     <button
                       onClick={() => onViewChange('metas')}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl transition-colors duration-200 flex items-center space-x-2"
                     >
                       <RefreshCw className="w-4 h-4" />
                       <span>Actualizar</span>
@@ -265,7 +265,7 @@ const CoachDashboard: React.FC<CoachDashboardProps> = ({ goals, onViewChange }) 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <button
               onClick={() => onViewChange('metas')}
-              className="flex items-center justify-center space-x-3 p-6 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg transition-all duration-200"
+              className="flex items-center justify-center space-x-3 p-6 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-2xl transition-all duration-200"
             >
               <Target className="w-6 h-6 text-blue-400" />
               <span className="text-white font-medium">Ver Todas las Metas</span>
@@ -273,7 +273,7 @@ const CoachDashboard: React.FC<CoachDashboardProps> = ({ goals, onViewChange }) 
             
             <button
               onClick={() => onViewChange('coach')}
-              className="flex items-center justify-center space-x-3 p-6 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg transition-all duration-200"
+              className="flex items-center justify-center space-x-3 p-6 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-2xl transition-all duration-200"
             >
               <TrendingUp className="w-6 h-6 text-green-400" />
               <span className="text-white font-medium">Hablar con el Coach</span>
@@ -284,9 +284,9 @@ const CoachDashboard: React.FC<CoachDashboardProps> = ({ goals, onViewChange }) 
                 // Aquí podrías abrir el panel de notificaciones
                 console.log('Abrir notificaciones');
               }}
-              className="flex items-center justify-center space-x-3 p-6 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/30 rounded-lg transition-all duration-200"
+              className="flex items-center justify-center space-x-3 p-6 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/30 rounded-2xl transition-all duration-200"
             >
-              <Bell className="w-6 h-6 text-yellow-400" />
+              <Bell className="w-6 h-6 text-blue-400" />
               <span className="text-white font-medium">
                 Notificaciones
               </span>

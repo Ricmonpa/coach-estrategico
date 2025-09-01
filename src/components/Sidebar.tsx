@@ -45,7 +45,7 @@ const Sidebar = ({ isOpen, onClose, currentView, onViewChange, isMobile }: Sideb
       
       {/* Sidebar */}
       <div 
-        className={`fixed top-0 left-0 w-80 bg-slate-900 z-50 transform transition-all duration-300 ease-out ${
+        className={`fixed top-0 left-0 w-96 bg-slate-900 z-50 transform transition-all duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{ 
@@ -62,8 +62,8 @@ const Sidebar = ({ isOpen, onClose, currentView, onViewChange, isMobile }: Sideb
             <img 
               src="/brain.png" 
               alt="Brain" 
-              className="w-5 h-5 object-contain"
-              style={{ maxWidth: '20px', maxHeight: '20px' }}
+              className="w-8 h-8 object-contain"
+              style={{ maxWidth: '32px', maxHeight: '32px', marginLeft: '8px', marginTop: '4px' }}
             />
           </div>
           {/* Botón de cerrar siempre visible */}
@@ -107,14 +107,15 @@ const Sidebar = ({ isOpen, onClose, currentView, onViewChange, isMobile }: Sideb
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-blue-400 rounded-r-full" />
                       )}
                       
-                      <div className={`mr-12 p-2 rounded-lg transition-all duration-200 ${
+                      <div className={`p-2 rounded-lg transition-all duration-200 ${
                         isActive 
                           ? 'bg-blue-600/40 text-white shadow-lg shadow-blue-600/20' 
                           : 'bg-slate-700/60 text-blue-600 group-hover:bg-slate-600/60 group-hover:text-blue-700 group-hover:shadow-md'
-                      }`}>
+                      }`}
+                      style={{ marginRight: '1rem' }}>
                         <Icon className="w-5 h-5" style={{ color: isActive ? '#ffffff' : '#2563eb' }} />
                       </div>
-                      <div className="text-left">
+                      <div className="text-left" style={{ marginLeft: '0.5rem' }}>
                         <div 
                           className={`sidebar-title font-semibold transition-colors duration-200 ${
                             isActive ? 'text-blue-600' : 'text-blue-600 group-hover:text-blue-700'
@@ -150,14 +151,15 @@ const Sidebar = ({ isOpen, onClose, currentView, onViewChange, isMobile }: Sideb
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-blue-400 rounded-r-full" />
               )}
               
-              <div className={`mr-12 p-2 rounded-lg transition-all duration-200 ${
+              <div className={`p-2 rounded-lg transition-all duration-200 ${
                 currentView === 'perfil'
                   ? 'bg-blue-600/40 text-white shadow-lg shadow-blue-600/20' 
                   : 'bg-slate-700/60 text-blue-600 group-hover:bg-slate-600/60 group-hover:text-blue-700 group-hover:shadow-md'
-              }`}>
+              }`}
+              style={{ marginRight: '1rem' }}>
                 <User className="w-5 h-5" style={{ color: currentView === 'perfil' ? '#ffffff' : '#2563eb' }} />
               </div>
-              <div className="text-left">
+              <div className="text-left" style={{ marginLeft: '0.5rem' }}>
                 <div 
                   className={`sidebar-title font-semibold transition-colors duration-200 ${
                     currentView === 'perfil' ? 'text-blue-600' : 'text-blue-600 group-hover:text-blue-700'

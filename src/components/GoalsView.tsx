@@ -171,28 +171,32 @@ const GoalsView = ({ goals, onAddGoal, onUpdateGoal }: GoalsViewProps) => {
   };
 
   return (
-    <div className="h-full overflow-y-auto p-6 custom-scrollbar relative">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-white">Metas Críticas</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg flex items-center transition-all duration-200"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Nueva Meta
-        </button>
-      </div>
-      
-      <div className="space-y-16">
-        {goals.map(renderGoalCard)}
+    <>
+      <div className="h-full overflow-y-auto p-6 custom-scrollbar relative goals-container">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-8 goals-header">
+            <h2 className="text-3xl font-bold text-white goals-title">Metas Críticas</h2>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-2xl flex items-center transition-all duration-200 goals-add-button"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Nueva Meta
+            </button>
+          </div>
+          
+          <div className="space-y-16 goals-list">
+            {goals.map(renderGoalCard)}
+          </div>
+        </div>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 z-[9999]">
-          <div className="bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-700/50">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999]" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
+          <div className="bg-slate-900/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-lg p-6 border border-blue-600/30" style={{ margin: 'auto', maxWidth: '32rem', backgroundColor: 'rgba(15, 23, 42, 0.95)', borderRadius: '1.5rem', borderColor: 'rgba(37, 99, 235, 0.3)' }}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Crear Nueva Meta Crítica</h2>
+              <h2 className="text-2xl font-bold text-blue-300">Crear Nueva Meta Crítica</h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="text-gray-400 hover:text-white"
@@ -357,7 +361,7 @@ const GoalsView = ({ goals, onAddGoal, onUpdateGoal }: GoalsViewProps) => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

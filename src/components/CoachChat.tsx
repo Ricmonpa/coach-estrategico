@@ -208,7 +208,7 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
                   <div className="mt-4 pt-4 border-t border-slate-700/50">
                     <button
                       onClick={() => onCreateGoal(goalData)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium"
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-2xl transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                       📊 Crear Meta Automáticamente
                     </button>
@@ -253,7 +253,7 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
     if (message.role === 'user') {
       return (
         <div key={index} className="flex justify-end animate-fade-in">
-          <div className="chat-message-user text-white rounded-xl p-6 max-w-sm" style={{ marginRight: '1rem', marginLeft: '2rem' }}>
+          <div className="text-white p-6 max-w-sm" style={{ marginRight: '1rem', marginLeft: '2rem' }}>
             {message.parts[0].text}
           </div>
         </div>

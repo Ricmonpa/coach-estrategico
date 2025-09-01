@@ -14,7 +14,7 @@ import { notificationService } from './services/notificationService';
 import { useNotifications } from './hooks/useNotifications';
 
 function App() {
-  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+  const [currentView, setCurrentView] = useState<ViewType>('coach');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Cambiado a true para desktop por defecto
   const [isMobile, setIsMobile] = useState(false);
   const [goals, setGoals] = useState<Goal[]>(initialGoals);

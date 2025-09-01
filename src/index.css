@@ -518,6 +518,13 @@ nav button > div {
   border-color: #60a5fa !important;
 }
 
+/* Dashboard buttons specific styling - override nav button rules */
+.dashboard-card button,
+.quick-actions button,
+.focus-card button {
+  border-radius: 1rem !important;
+}
+
 /* Chat message styling improvements */
 .chat-message-user {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -690,6 +697,23 @@ nav button > div {
     box-shadow: none !important;
     background: #0f172a !important;
   }
+  
+  /* Tablet optimizations for goals view */
+  .goal-card {
+    padding: 2rem !important;
+  }
+  
+  .goals-header {
+    margin-bottom: 2rem !important;
+  }
+  
+  .goals-title {
+    font-size: 2.25rem !important;
+  }
+  
+  .goals-list {
+    gap: 2rem !important;
+  }
 }
 
 /* Desktop improvements */
@@ -699,6 +723,16 @@ nav button > div {
     margin-right: auto;
     padding-left: 2rem;
     padding-right: 2rem;
+  }
+  
+  /* Add top spacing for goals section on desktop */
+  .goals-container {
+    padding-top: 3rem !important;
+  }
+  
+  /* Add margin to push content down on desktop */
+  .goals-container .max-w-4xl {
+    margin-top: 2rem !important;
   }
 }
 
@@ -790,6 +824,87 @@ nav button > div {
   .notification-card p {
     font-size: 0.875rem !important;
     line-height: 1.5 !important;
+  }
+  
+  /* Mobile optimizations for goals view */
+  .goal-card {
+    padding: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* Reduce internal spacing in goal cards on mobile */
+  .goal-card h3 {
+    font-size: 1.125rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .goal-card p {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .goal-card .flex {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Reduce spacing between goal cards on mobile */
+  .goal-card + .goal-card {
+    margin-top: 2rem !important;
+  }
+  
+  /* Reduce header spacing in goals view on mobile */
+  .goals-header {
+    margin-bottom: 1.5rem !important;
+    margin-top: 1rem !important;
+  }
+  
+  /* Reduce title size on mobile */
+  .goals-title {
+    font-size: 1.75rem !important;
+  }
+  
+  /* Reduce button padding on mobile */
+  .goals-add-button {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+    background-color: #3b82f6 !important;
+    border-radius: 1rem !important;
+    color: white !important;
+  }
+  
+  .goals-add-button:hover {
+    background-color: #2563eb !important;
+    color: white !important;
+  }
+  
+  /* Reduce container padding on mobile */
+  .goals-container {
+    padding: 1rem !important;
+    padding-top: 3rem !important;
+  }
+  
+  /* Reduce space between goals on mobile */
+  .goals-list {
+    gap: 1.5rem !important;
+  }
+  
+  /* Add top margin to push content down on mobile */
+  .goals-container .max-w-4xl {
+    margin-top: 2rem !important;
+  }
+  
+  /* Additional top spacing for mobile layout */
+  .goals-container {
+    padding-top: 5rem !important;
+  }
+  
+  /* Push the first goal card down on mobile */
+  .goals-list > div:first-child {
+    margin-top: 2rem !important;
+  }
+  
+  /* Ensure content doesn't overlap with fixed header on mobile */
+  .goals-container {
+    margin-top: 4rem !important;
   }
   
   /* Asegurar que el panel de notificaciones ocupe toda la pantalla en mobile */
