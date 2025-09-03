@@ -15,7 +15,7 @@ interface CoachChatProps {
   onSendMessage: () => void;
 }
 
-const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiStatus, messages, inputValue, onInputChange, onSendMessage }: CoachChatProps) => {
+const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, inputValue, onInputChange, onSendMessage }: CoachChatProps) => {
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,42 +112,36 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
 
   const renderCoachResponse = (response: CoachResponse) => {
     let suggestionHTML = null;
-    if (response.suggestedResource && response.suggestionContext) {
-      const resource = resources.find(r => r.title === response.suggestedResource);
-      if (resource) {
-        suggestionHTML = (
-          <div className="mt-4 pt-4 border-t border-slate-700/50">
-            <p className="text-sm text-slate-400 mb-2">
-              <strong>Sugerencia:</strong> {response.suggestionContext}
-            </p>
-            <div 
-              onClick={() => onResourceClick(resource)}
-              className="resource-suggestion cursor-pointer"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-slate-700 w-8 h-8 rounded-md flex items-center justify-center mr-3 text-blue-400">
-                  <div className="w-4 h-4 bg-blue-400 rounded"></div>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-white">{resource.title}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
+    if (response.suggestedResource) {
+      suggestionHTML = (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+          <p className="text-sm text-blue-800">
+            <strong>💡 Recurso Sugerido:</strong> {response.suggestedResource}
+          </p>
+          {response.suggestionContext && (
+            <p className="text-sm text-blue-700 mt-1">{response.suggestionContext}</p>
+          )}
+        </div>
+      );
     }
 
     // Función para extraer información de la meta
     const extractGoalFromMeta = (metaText: string): Omit<Goal, 'id'> | null => {
       try {
-        // Buscar patrones de dinero
-        const amountMatch = metaText.match(/(\d+(?:,\d+)?)\s*(USD|MXN|pesos?|dólares?)/i);
-        const timeMatch = metaText.match(/(\d+)\s*(semanas?|días?|meses?)/i);
+        console.log('🔍 Analizando meta:', metaText); // Debug log
         
-        // Buscar patrones de usuarios/comentarios
+        // Buscar patrones de dinero (más flexible)
+        const amountMatch = metaText.match(/(\d+(?:,\d+)?)\s*(USD|MXN|pesos?|dólares?|€|euros?)/i);
+        const timeMatch = metaText.match(/(\d+)\s*(semanas?|días?|meses?|años?)/i);
+        
+        // Buscar patrones expandidos de actividades/objetivos
         const usersMatch = metaText.match(/(\d+)\s*usuarios?/i);
         const commentsMatch = metaText.match(/(\d+)\s*comentarios?/i);
+        const trainingMatch = metaText.match(/(\d+)\s*(entrenamientos?|sesiones?|veces?)\s*(por\s*)?(semana|día|mes)/i);
+        const hoursMatch = metaText.match(/(\d+)\s*horas?/i);
+        const daysMatch = metaText.match(/(\d+)\s*días?/i);
+        const weeksMatch = metaText.match(/(\d+)\s*semanas?/i);
+        const monthsMatch = metaText.match(/(\d+)\s*meses?/i);
         
         // Calcular fecha límite si hay tiempo especificado
         let deadline: Date | undefined;
@@ -162,11 +156,13 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
             deadline.setDate(deadline.getDate() + timeValue);
           } else if (timeUnit.includes('mes')) {
             deadline.setMonth(deadline.getMonth() + timeValue);
+          } else if (timeUnit.includes('año')) {
+            deadline.setFullYear(deadline.getFullYear() + timeValue);
           }
         }
         
-        // Si es meta de dinero
-        if (amountMatch && timeMatch) {
+        // Si es meta de dinero (más flexible - no requiere tiempo obligatorio)
+        if (amountMatch) {
           const amount = parseFloat(amountMatch[1].replace(',', ''));
           const currency = amountMatch[2].toUpperCase();
           
@@ -176,6 +172,27 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
             current: 0,
             target: amount,
             unit: currency,
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: deadline
+          };
+        }
+        
+        // Si es meta de entrenamientos/sesiones por tiempo
+        if (trainingMatch) {
+          const count = parseInt(trainingMatch[1]);
+          const timeUnit = trainingMatch[4] || 'semana';
+          
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: 'Entrenamientos/Sesiones',
+            current: 0,
+            target: count,
+            unit: `por ${timeUnit}`,
             status: 'En Progreso',
             createdAt: new Date(),
             lastUpdated: new Date(),
@@ -224,7 +241,50 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
           };
         }
         
-        // Meta genérica si no coincide con patrones específicos
+        // Si es meta de horas
+        if (hoursMatch) {
+          const hourCount = parseInt(hoursMatch[1]);
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: 'Horas',
+            current: 0,
+            target: hourCount,
+            unit: 'horas',
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: deadline
+          };
+        }
+        
+        // Si es meta de días/semanas/meses (tiempo)
+        if (daysMatch || weeksMatch || monthsMatch) {
+          const timeValue = daysMatch ? parseInt(daysMatch[1]) : 
+                           weeksMatch ? parseInt(weeksMatch[1]) : 
+                           monthsMatch ? parseInt(monthsMatch[1]) : 0;
+          const timeUnit = daysMatch ? 'días' : 
+                          weeksMatch ? 'semanas' : 'meses';
+          
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: 'Tiempo',
+            current: 0,
+            target: timeValue,
+            unit: timeUnit,
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: deadline
+          };
+        }
+        
+        // Meta genérica si no coincide con patrones específicos PERO tiene tiempo
         if (timeMatch) {
           return {
             title: `Meta del Coach: ${metaText}`,
@@ -242,6 +302,26 @@ const CoachChat = ({ resources, onResourceClick, onCreateGoal, isLoading, apiSta
           };
         }
         
+        // Meta genérica FINAL - SIEMPRE retorna algo si hay texto
+        if (metaText && metaText.trim().length > 0) {
+          console.log('📝 Creando meta genérica para:', metaText);
+          return {
+            title: `Meta del Coach: ${metaText}`,
+            metric: 'Objetivo',
+            current: 0,
+            target: 1,
+            unit: 'completado',
+            status: 'En Progreso',
+            createdAt: new Date(),
+            lastUpdated: new Date(),
+            progressHistory: [],
+            reminderFrequency: 'weekly',
+            nextReminder: new Date(),
+            deadline: undefined
+          };
+        }
+        
+        console.log('❌ No se pudo extraer meta de:', metaText);
         return null;
       } catch (error) {
         console.error('Error extracting goal from meta:', error);

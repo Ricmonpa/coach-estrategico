@@ -22,11 +22,7 @@ export class AIService {
     this.resources = resources;
   }
 
-  private buildSystemPrompt(conversationContext?: {
-    userMessagesCount: number;
-    hasEnoughContext: boolean;
-    keyTopicsCovered: string[];
-  }): string {
+  private buildSystemPrompt(): string {
     const resourcesList = this.resources.length > 0 
       ? this.resources.map(r => r.title).join(', ')
       : 'No hay recursos disponibles en este momento.';
@@ -47,7 +43,7 @@ export class AIService {
 **FLUJO DE CONVERSACIÓN OBLIGATORIO:**
 1. **Primera respuesta:** Presenta tu método y da UN SOLO desafío inicial. NO diagnostiques ni recomiendes metas aún.
 2. **Preguntas de seguimiento:** Haz 3-5 preguntas específicas y profundas para entender completamente la situación. Para estas preguntas, usa solo el campo "challenge" y deja "plan" vacío.
-3. **Diagnóstico final:** Solo después de tener suficiente contexto (mínimo 3-4 intercambios), haz el diagnóstico brutal y recomienda metas específicas. Aquí sí usa el formato completo con "plan" lleno Y SIEMPRE incluye una "meta" cuantitativa.
+3. **Diagnóstico final:** Solo después de tener suficiente contexto (mínimo 3-4 intercambios), haz el diagnóstico brutal y recomienda metas específicas. Aquí sí usa el formato completo con "plan" lleno Y SIEMPRE incluye una "meta" cuantitativa específica con fecha límite.
 
 **CRITERIOS PARA DIAGNÓSTICO FINAL:**
 Solo da el diagnóstico final cuando tengas:
@@ -77,17 +73,7 @@ Los recursos disponibles son: ${resourcesList}. No inventes nuevos.
 - Solo en el diagnóstico final usa el formato completo con "plan" lleno de acciones específicas, "truth" con el análisis brutal, Y SIEMPRE incluye "meta" con una meta cuantitativa específica con fecha límite.
 - SÉ BRUTALMENTE CONCISO. No más de 2-3 frases por sección.
 - HAZ MÁS PREGUNTAS DE SEGUIMIENTO. No te apresures al diagnóstico.
-
-${conversationContext ? `
-**CONTEXTO ACTUAL DE LA CONVERSACIÓN:**
-- Mensajes del usuario: ${conversationContext.userMessagesCount}
-- Temas cubiertos: ${conversationContext.keyTopicsCovered.join(', ')}
-- ¿Suficiente contexto para diagnóstico?: ${conversationContext.hasEnoughContext ? 'SÍ' : 'NO'}
-
-${conversationContext.hasEnoughContext ? 
-  'TIENES SUFICIENTE CONTEXTO. Es momento de dar el diagnóstico final con plan de acción y meta específica.' : 
-  'AÚN NECESITAS MÁS CONTEXTO. Continúa haciendo preguntas de seguimiento específicas.'
-}` : ''}`;
+`;
   }
 
   private formatConversationHistory(history: ConversationMessage[]): any[] {
@@ -97,45 +83,7 @@ ${conversationContext.hasEnoughContext ?
     }));
   }
 
-  private analyzeConversationContext(history: ConversationMessage[]): {
-    userMessagesCount: number;
-    hasEnoughContext: boolean;
-    keyTopicsCovered: string[];
-  } {
-    const userMessages = history.filter(msg => msg.role === 'user');
-    const userMessagesCount = userMessages.length;
-    
-    // Extraer temas clave de las respuestas del usuario
-    const keyTopicsCovered: string[] = [];
-    const userTexts = userMessages.map(msg => msg.parts[0].text.toLowerCase());
-    
-    // Detectar temas clave basados en palabras clave
-    const topics = {
-      'problema_principal': ['problema', 'obstáculo', 'bloqueo', 'dificultad', 'retroceso'],
-      'recursos': ['dinero', 'tiempo', 'habilidades', 'conexiones', 'herramientas'],
-      'intentos_previos': ['intenté', 'probé', 'hice', 'implementé', 'falló'],
-      'objetivo': ['quiero', 'meta', 'objetivo', 'lograr', 'alcanzar'],
-      'limitaciones': ['no puedo', 'no tengo', 'es difícil', 'imposible', 'no sé']
-    };
-    
-    Object.entries(topics).forEach(([topic, keywords]) => {
-      const hasTopic = userTexts.some(text => 
-        keywords.some(keyword => text.includes(keyword))
-      );
-      if (hasTopic) {
-        keyTopicsCovered.push(topic);
-      }
-    });
-    
-    // Determinar si hay suficiente contexto para el diagnóstico final
-    const hasEnoughContext = userMessagesCount >= 3 && keyTopicsCovered.length >= 3;
-    
-    return {
-      userMessagesCount,
-      hasEnoughContext,
-      keyTopicsCovered
-    };
-  }
+
 
   private extractFallbackResponse(text: string): CoachResponse | null {
     try {
@@ -214,10 +162,10 @@ ${conversationContext.hasEnoughContext ?
     }
 
     // Analizar el contexto de la conversación para determinar si es momento del diagnóstico final
-    const conversationContext = this.analyzeConversationContext(conversationHistory);
+
     
     // Construir el prompt del sistema con información del contexto
-    const systemPrompt = this.buildSystemPrompt(conversationContext);
+    const systemPrompt = this.buildSystemPrompt();
     const formattedHistory = this.formatConversationHistory(conversationHistory);
 
     const payload = {

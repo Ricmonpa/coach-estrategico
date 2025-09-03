@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import './index.css';
 import { Bell } from 'lucide-react';
-import type { ViewType, Goal, ConversationMessage } from './types/index';
+import type { ViewType, Goal, ConversationMessage, Resource } from './types/index';
 import { initialGoals, resources, initialNotifications } from './data/initialData';
 import CoachChat from './components/CoachChat';
 import GoalsView from './components/GoalsView';
@@ -9,9 +10,11 @@ import ProfileView from './components/ProfileView';
 import CoachDashboard from './components/CoachDashboard';
 import Sidebar from './components/Sidebar';
 import NotificationPanel from './components/NotificationPanel';
+import ToastContainer from './components/ToastContainer';
 import aiService from './services/aiService';
 import { notificationService } from './services/notificationService';
 import { useNotifications } from './hooks/useNotifications';
+import { useToast } from './contexts/ToastContext';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewType>('coach');
@@ -26,6 +29,8 @@ function App() {
 
   // Hook para manejar notificaciones automáticas
   const { requestNotificationPermission, checkCompletedGoals, checkStuckGoals } = useNotifications(goals);
+  // Hook para manejar toasts
+  const { showToast } = useToast();
   const [messages, setMessages] = useState<ConversationMessage[]>([
     {
       role: 'user',
@@ -76,6 +81,14 @@ function App() {
     const notification = notificationService.generateNewGoalNotification(goal);
     notificationService.addNotification(notification);
     updateNotificationCount();
+    
+    // Mostrar toast de confirmación
+    showToast({
+      type: 'success',
+      title: '🎯 Meta Creada',
+      message: `Tu meta "${goal.title}" ha sido creada exitosamente`,
+      duration: 4000
+    });
   };
 
   const handleUpdateGoal = (goalId: number, updates: Partial<Goal>) => {
@@ -200,7 +213,15 @@ function App() {
     }
   };
 
-
+  const handleResourceClick = (resource: Resource) => {
+    showToast({
+      type: 'info',
+      title: 'Recurso Abierto',
+      message: `Abriendo recurso: ${resource.title}`,
+      duration: 3000
+    });
+    // Aquí podrías abrir un modal o una nueva pestaña con el recurso
+  };
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -211,20 +232,20 @@ function App() {
             onViewChange={handleViewChange}
           />
         );
-              case 'coach':
-          return (
-            <CoachChat
-              resources={resources}
-              onResourceClick={() => {}}
-              onCreateGoal={handleAddGoal}
-              isLoading={isLoading}
-              apiStatus={apiStatus}
-              messages={messages}
-              inputValue={inputValue}
-              onInputChange={setInputValue}
-              onSendMessage={handleSendMessage}
-            />
-          );
+      case 'coach':
+        return (
+          <CoachChat
+            resources={resources}
+            onResourceClick={handleResourceClick}
+            onCreateGoal={handleAddGoal}
+            isLoading={isLoading}
+            apiStatus={apiStatus}
+            messages={messages}
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSendMessage={handleSendMessage}
+          />
+        );
       case 'metas':
         return (
           <GoalsView
@@ -334,6 +355,9 @@ function App() {
           isMobile={isMobile}
         />
       ) : null}
+      
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
   );
 }
