@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { AlertCircle, SendHorizontal } from 'lucide-react';
-import type { CoachResponse, ConversationMessage, Resource, Goal } from '../types/index';
+import type { CoachResponse, ConversationMessage, Resource, Goal, Micrometa } from '../types/index';
 import aiService from '../services/aiService';
 
 interface CoachChatProps {
@@ -125,10 +125,49 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
       );
     }
 
-    // Función para extraer información de la meta
-    const extractGoalFromMeta = (metaText: string): Omit<Goal, 'id'> | null => {
+    // Función para generar micrometas automáticamente basadas en el plan de acción
+    const generateMicrometasFromPlan = (planItems: string[], parentGoalId: number): Omit<Micrometa, 'id'>[] => {
+      if (!planItems || planItems.length === 0) return [];
+      
+      return planItems.map((item, index) => {
+        // Determinar prioridad basada en la posición y contenido
+        let priority: 'high' | 'medium' | 'low' = 'medium';
+        if (index === 0) priority = 'high'; // Primera acción es alta prioridad
+        if (item.toLowerCase().includes('urgente') || item.toLowerCase().includes('crítico')) priority = 'high';
+        if (item.toLowerCase().includes('opcional') || item.toLowerCase().includes('después')) priority = 'low';
+        
+        // Calcular deadline basado en la posición (primera acción más pronto)
+        const deadline = new Date();
+        if (priority === 'high') {
+          deadline.setDate(deadline.getDate() + 14); // 2 semanas
+        } else if (priority === 'medium') {
+          deadline.setDate(deadline.getDate() + 30); // 1 mes
+        } else {
+          deadline.setDate(deadline.getDate() + 60); // 2 meses
+        }
+        
+        return {
+          parentGoalId,
+          title: item.length > 50 ? item.substring(0, 47) + '...' : item,
+          description: item,
+          current: 0,
+          target: 100,
+          unit: '%',
+          status: 'En Progreso' as const,
+          priority,
+          createdAt: new Date(),
+          lastUpdated: new Date(),
+          progressHistory: [],
+          deadline
+        };
+      });
+    };
+
+    // Función para extraer información de la meta y generar micrometas automáticamente
+    const extractGoalFromMeta = (metaText: string, planItems: string[] = []): Omit<Goal, 'id'> | null => {
       try {
         console.log('🔍 Analizando meta:', metaText); // Debug log
+        console.log('📋 Plan de acción para micrometas:', planItems); // Debug log
         
         // Buscar patrones de dinero (más flexible)
         const amountMatch = metaText.match(/(\d+(?:,\d+)?)\s*(USD|MXN|pesos?|dólares?|€|euros?)/i);
@@ -166,6 +205,9 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
           const amount = parseFloat(amountMatch[1].replace(',', ''));
           const currency = amountMatch[2].toUpperCase();
           
+          // Generar micrometas automáticamente
+          const micrometas = generateMicrometasFromPlan(planItems, 0); // parentGoalId se asignará después
+          
           return {
             title: `Meta del Coach: ${metaText}`,
             metric: `Ingresos (${currency})`,
@@ -178,7 +220,8 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: deadline
+            deadline: deadline,
+            micrometas: micrometas
           };
         }
         
@@ -186,6 +229,9 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
         if (trainingMatch) {
           const count = parseInt(trainingMatch[1]);
           const timeUnit = trainingMatch[4] || 'semana';
+          
+          // Generar micrometas automáticamente
+          const micrometas = generateMicrometasFromPlan(planItems, 0);
           
           return {
             title: `Meta del Coach: ${metaText}`,
@@ -199,13 +245,16 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: deadline
+            deadline: deadline,
+            micrometas: micrometas
           };
         }
         
         // Si es meta de usuarios
         if (usersMatch) {
           const userCount = parseInt(usersMatch[1]);
+          const micrometas = generateMicrometasFromPlan(planItems, 0);
+          
           return {
             title: `Meta del Coach: ${metaText}`,
             metric: 'Usuarios Registrados',
@@ -218,13 +267,16 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: deadline
+            deadline: deadline,
+            micrometas: micrometas
           };
         }
         
         // Si es meta de comentarios
         if (commentsMatch) {
           const commentCount = parseInt(commentsMatch[1]);
+          const micrometas = generateMicrometasFromPlan(planItems, 0);
+          
           return {
             title: `Meta del Coach: ${metaText}`,
             metric: 'Comentarios de Usuarios',
@@ -237,13 +289,16 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: deadline
+            deadline: deadline,
+            micrometas: micrometas
           };
         }
         
         // Si es meta de horas
         if (hoursMatch) {
           const hourCount = parseInt(hoursMatch[1]);
+          const micrometas = generateMicrometasFromPlan(planItems, 0);
+          
           return {
             title: `Meta del Coach: ${metaText}`,
             metric: 'Horas',
@@ -256,7 +311,8 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: deadline
+            deadline: deadline,
+            micrometas: micrometas
           };
         }
         
@@ -267,6 +323,7 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
                            monthsMatch ? parseInt(monthsMatch[1]) : 0;
           const timeUnit = daysMatch ? 'días' : 
                           weeksMatch ? 'semanas' : 'meses';
+          const micrometas = generateMicrometasFromPlan(planItems, 0);
           
           return {
             title: `Meta del Coach: ${metaText}`,
@@ -280,12 +337,15 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: deadline
+            deadline: deadline,
+            micrometas: micrometas
           };
         }
         
         // Meta genérica si no coincide con patrones específicos PERO tiene tiempo
         if (timeMatch) {
+          const micrometas = generateMicrometasFromPlan(planItems, 0);
+          
           return {
             title: `Meta del Coach: ${metaText}`,
             metric: 'Progreso',
@@ -298,13 +358,16 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: deadline
+            deadline: deadline,
+            micrometas: micrometas
           };
         }
         
         // Meta genérica FINAL - SIEMPRE retorna algo si hay texto
         if (metaText && metaText.trim().length > 0) {
           console.log('📝 Creando meta genérica para:', metaText);
+          const micrometas = generateMicrometasFromPlan(planItems, 0);
+          
           return {
             title: `Meta del Coach: ${metaText}`,
             metric: 'Objetivo',
@@ -317,7 +380,8 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             progressHistory: [],
             reminderFrequency: 'weekly',
             nextReminder: new Date(),
-            deadline: undefined
+            deadline: undefined,
+            micrometas: micrometas
           };
         }
         
@@ -329,7 +393,7 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
       }
     };
 
-    const goalData = response.meta ? extractGoalFromMeta(response.meta) : null;
+    const goalData = response.meta ? extractGoalFromMeta(response.meta, response.plan) : null;
 
     return (
       <div className="animate-fade-in">

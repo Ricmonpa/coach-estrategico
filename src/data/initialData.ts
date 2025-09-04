@@ -1,4 +1,4 @@
-import type { Goal, Resource, Notification, CoachReminder } from '../types/index';
+import type { Goal, Resource, Notification, CoachReminder, Micrometa } from '../types/index';
 
 export const initialGoals: Goal[] = [
   {
@@ -18,7 +18,116 @@ export const initialGoals: Goal[] = [
       { date: new Date('2024-03-01'), value: 75000 }
     ],
     reminderFrequency: 'daily',
-    nextReminder: new Date(Date.now() + 24 * 60 * 60 * 1000)
+    nextReminder: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    micrometas: [
+      {
+        id: 1,
+        parentGoalId: 1,
+        title: 'Pricing Strategy',
+        description: 'Optimizar estrategia de precios para aumentar conversión y valor por cliente',
+        current: 0,
+        target: 100,
+        unit: '%',
+        status: 'En Progreso',
+        priority: 'high',
+        createdAt: new Date('2024-01-01'),
+        lastUpdated: new Date('2024-01-01'),
+        progressHistory: [],
+        deadline: new Date('2024-03-31')
+      },
+      {
+        id: 2,
+        parentGoalId: 1,
+        title: 'Customer Retention',
+        description: 'Implementar estrategias de retención de clientes para reducir churn',
+        current: 25,
+        target: 100,
+        unit: '%',
+        status: 'En Progreso',
+        priority: 'high',
+        createdAt: new Date('2024-01-01'),
+        lastUpdated: new Date('2024-01-15'),
+        progressHistory: [
+          {
+            date: new Date('2024-01-15'),
+            value: 25,
+            notes: 'Implementé sistema de seguimiento de churn y análisis de cohortes',
+            evidence: 'Configuré analytics para tracking de retención y identifiqué patrones de abandono',
+            links: ['https://analytics.example.com/dashboard']
+          }
+        ],
+        deadline: new Date('2024-04-30')
+      },
+      {
+        id: 3,
+        parentGoalId: 1,
+        title: 'Sales Process',
+        description: 'Mejorar proceso de ventas para aumentar tasa de conversión',
+        current: 60,
+        target: 100,
+        unit: '%',
+        status: 'En Progreso',
+        priority: 'medium',
+        createdAt: new Date('2024-01-01'),
+        lastUpdated: new Date('2024-02-01'),
+        progressHistory: [
+          {
+            date: new Date('2024-02-01'),
+            value: 60,
+            notes: 'Automaticé el seguimiento de leads y mejoré el proceso de onboarding',
+            evidence: 'Implementé CRM automatizado y flujo de seguimiento post-venta',
+            links: ['https://crm.example.com/leads']
+          }
+        ],
+        deadline: new Date('2024-05-15')
+      },
+      {
+        id: 4,
+        parentGoalId: 1,
+        title: 'Product Features',
+        description: 'Desarrollar nuevas funcionalidades que aumenten el valor del producto',
+        current: 40,
+        target: 100,
+        unit: '%',
+        status: 'En Progreso',
+        priority: 'medium',
+        createdAt: new Date('2024-01-01'),
+        lastUpdated: new Date('2024-01-20'),
+        progressHistory: [
+          {
+            date: new Date('2024-01-20'),
+            value: 40,
+            notes: 'Lancé integración con API externa y mejoré la interfaz de usuario',
+            evidence: 'Nueva funcionalidad disponible en producción con feedback positivo',
+            links: ['https://product.example.com/features']
+          }
+        ],
+        deadline: new Date('2024-06-30')
+      },
+      {
+        id: 5,
+        parentGoalId: 1,
+        title: 'Marketing Campaigns',
+        description: 'Ejecutar campañas de marketing dirigidas para generar más leads calificados',
+        current: 15,
+        target: 100,
+        unit: '%',
+        status: 'En Progreso',
+        priority: 'low',
+        createdAt: new Date('2024-01-01'),
+        lastUpdated: new Date('2024-01-10'),
+        progressHistory: [
+          {
+            date: new Date('2024-01-10'),
+            value: 15,
+            notes: 'Configuré campañas en Google Ads y LinkedIn',
+            evidence: 'Campañas activas con métricas iniciales de conversión',
+            links: ['https://ads.google.com/campaigns']
+          }
+        ],
+        deadline: new Date('2024-07-31')
+      }
+    ]
   }
 ];
 

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Eye } from 'lucide-react';
 import type { Goal } from '../types/index';
 
 interface GoalsViewProps {
   goals: Goal[];
   onAddGoal: (goal: Omit<Goal, 'id'>) => void;
   onUpdateGoal?: (goalId: number, updates: Partial<Goal>) => void;
+  onViewMicrometas?: (goal: Goal) => void;
 }
 
 // Componente de barra de progreso reutilizable
@@ -69,7 +70,7 @@ const ProgressBar = ({
   );
 };
 
-const GoalsView = ({ goals, onAddGoal, onUpdateGoal }: GoalsViewProps) => {
+const GoalsView = ({ goals, onAddGoal, onUpdateGoal, onViewMicrometas }: GoalsViewProps) => {
   const [showModal, setShowModal] = useState(false);
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
@@ -152,8 +153,22 @@ const GoalsView = ({ goals, onAddGoal, onUpdateGoal }: GoalsViewProps) => {
           showPercentage={true}
         />
         
-        {/* Botón pequeño para actualizar progreso */}
-        <div className="flex justify-end mt-6">
+        {/* Botones de acción */}
+        <div className="flex justify-end gap-3 mt-6">
+          {onViewMicrometas && (
+            <button
+              onClick={() => onViewMicrometas(goal)}
+              className="bg-green-600/40 hover:bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-green-500/40 hover:border-green-400 transition-all duration-200 flex items-center"
+              style={{
+                backgroundColor: 'rgba(34, 197, 94, 0.4)',
+                color: 'white',
+                borderColor: 'rgba(34, 197, 94, 0.4)'
+              }}
+            >
+              <Eye className="w-3 h-3 mr-1" />
+              Detalle
+            </button>
+          )}
           <button
             onClick={() => openProgressModal(goal)}
             className="bg-blue-600/40 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-500/40 hover:border-blue-400 transition-all duration-200"

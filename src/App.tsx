@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import './index.css';
 import { Bell } from 'lucide-react';
-import type { ViewType, Goal, ConversationMessage, Resource } from './types/index';
+import type { ViewType, Goal, ConversationMessage, Resource, Micrometa } from './types/index';
 import { initialGoals, resources, initialNotifications } from './data/initialData';
 import CoachChat from './components/CoachChat';
 import GoalsView from './components/GoalsView';
+import MicrometasView from './components/MicrometasView';
 import ResourcesView from './components/ResourcesView';
 import ProfileView from './components/ProfileView';
 import CoachDashboard from './components/CoachDashboard';
@@ -26,6 +27,7 @@ function App() {
   const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error' | 'no-key'>('checking');
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [selectedGoalForMicrometas, setSelectedGoalForMicrometas] = useState<Goal | null>(null);
 
   // Hook para manejar notificaciones automáticas
   const { requestNotificationPermission, checkCompletedGoals, checkStuckGoals } = useNotifications(goals);
@@ -71,10 +73,21 @@ function App() {
   }, [isMobile]); // Solo se ejecuta cuando cambia isMobile
 
   const handleAddGoal = (newGoal: Omit<Goal, 'id'>) => {
+    const goalId = Date.now();
+    
+    // Asignar IDs a las micrometas si existen
+    const micrometasWithIds = newGoal.micrometas?.map((micrometa, index) => ({
+      ...micrometa,
+      id: goalId + index + 1, // IDs únicos basados en el ID de la meta
+      parentGoalId: goalId
+    })) || [];
+    
     const goal: Goal = {
       ...newGoal,
-      id: Date.now()
+      id: goalId,
+      micrometas: micrometasWithIds
     };
+    
     setGoals(prev => [...prev, goal]);
     
     // Generar notificación de nueva meta creada
@@ -82,11 +95,12 @@ function App() {
     notificationService.addNotification(notification);
     updateNotificationCount();
     
-    // Mostrar toast de confirmación
+    // Mostrar toast de confirmación con información de micrometas
+    const micrometasCount = micrometasWithIds.length;
     showToast({
       type: 'success',
       title: '🎯 Meta Creada',
-      message: `Tu meta "${goal.title}" ha sido creada exitosamente`,
+      message: `Tu meta "${goal.title}" ha sido creada exitosamente${micrometasCount > 0 ? ` con ${micrometasCount} micrometas automáticas` : ''}`,
       duration: 4000
     });
   };
@@ -111,6 +125,28 @@ function App() {
     });
   };
 
+  const handleUpdateMicrometa = (micrometaId: number, updates: Partial<Micrometa>) => {
+    setGoals(prev => {
+      return prev.map(goal => {
+        if (goal.micrometas) {
+          const updatedMicrometas = goal.micrometas.map(micrometa =>
+            micrometa.id === micrometaId ? { ...micrometa, ...updates } : micrometa
+          );
+          return { ...goal, micrometas: updatedMicrometas, lastUpdated: new Date() };
+        }
+        return goal;
+      });
+    });
+
+    // Mostrar toast de confirmación
+    showToast({
+      type: 'success',
+      title: '📊 Progreso Actualizado',
+      message: 'El progreso de la micrometa ha sido actualizado exitosamente',
+      duration: 3000
+    });
+  };
+
   const handleSaveProfile = (data: { mission: string; values: string }) => {
     // TODO: Implement profile saving
     console.log('Profile saved:', data);
@@ -118,6 +154,24 @@ function App() {
 
   const handleViewChange = (view: ViewType) => {
     setCurrentView(view);
+    // Solo cerrar el sidebar en mobile cuando se cambia de vista
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  const handleViewMicrometas = (goal: Goal) => {
+    setSelectedGoalForMicrometas(goal);
+    setCurrentView('micrometas');
+    // Solo cerrar el sidebar en mobile cuando se cambia de vista
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  const handleBackFromMicrometas = () => {
+    setSelectedGoalForMicrometas(null);
+    setCurrentView('metas');
     // Solo cerrar el sidebar en mobile cuando se cambia de vista
     if (isMobile) {
       setIsSidebarOpen(false);
@@ -252,8 +306,18 @@ function App() {
             goals={goals}
             onAddGoal={handleAddGoal}
             onUpdateGoal={handleUpdateGoal}
+            onViewMicrometas={handleViewMicrometas}
           />
         );
+      case 'micrometas':
+        return selectedGoalForMicrometas ? (
+          <MicrometasView
+            parentGoal={selectedGoalForMicrometas}
+            micrometas={selectedGoalForMicrometas.micrometas || []}
+            onBack={handleBackFromMicrometas}
+            onUpdateMicrometa={handleUpdateMicrometa}
+          />
+        ) : null;
       case 'recursos':
         return (
           <ResourcesView

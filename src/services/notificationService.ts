@@ -1,4 +1,4 @@
-import type { Goal, Notification, CoachReminder } from '../types/index';
+import type { Goal, Notification, CoachReminder, Micrometa } from '../types/index';
 
 export class NotificationService {
   private notifications: Notification[] = [];
@@ -313,6 +313,77 @@ export class NotificationService {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     this.notifications = this.notifications.filter(n => n.createdAt > thirtyDaysAgo);
     this.saveNotifications();
+  }
+
+  // Generar notificación para micrometa completada
+  generateMicrometaCompletedNotification(micrometa: Micrometa, parentGoal: Goal): Notification {
+    return {
+      id: `micrometa-notification-${Date.now()}`,
+      type: 'achievement',
+      title: `🎯 ¡Micrometa completada: ${micrometa.title}!`,
+      message: `¡Excelente! Has completado la micrometa "${micrometa.title}" de tu meta "${parentGoal.title}". Cada micrometa completada te acerca más al objetivo final. ¡Sigue así!`,
+      goalId: parentGoal.id,
+      createdAt: new Date(),
+      isRead: false,
+      actionRequired: false,
+      actionUrl: '/micrometas',
+      priority: 'high'
+    };
+  }
+
+  // Generar notificación para progreso significativo en micrometa
+  generateMicrometaProgressNotification(micrometa: Micrometa, parentGoal: Goal): Notification {
+    const progress = (micrometa.current / micrometa.target) * 100;
+    
+    let title = '';
+    let message = '';
+    let priority: Notification['priority'] = 'medium';
+
+    if (progress >= 80) {
+      title = `📈 ¡Casi completas: ${micrometa.title}!`;
+      message = `Estás al ${progress.toFixed(1)}% de completar "${micrometa.title}". ¡El último esfuerzo es el más importante!`;
+      priority = 'high';
+    } else if (progress >= 50) {
+      title = `🚀 ¡Buen progreso: ${micrometa.title}!`;
+      message = `Has alcanzado el ${progress.toFixed(1)}% de "${micrometa.title}". ¡Mantén el momentum!`;
+    } else {
+      title = `💪 ¡Avanzando: ${micrometa.title}!`;
+      message = `Estás al ${progress.toFixed(1)}% de "${micrometa.title}". Cada paso cuenta hacia tu meta principal.`;
+    }
+
+    return {
+      id: `micrometa-progress-${Date.now()}`,
+      type: 'motivation',
+      title,
+      message,
+      goalId: parentGoal.id,
+      createdAt: new Date(),
+      isRead: false,
+      actionRequired: false,
+      actionUrl: '/micrometas',
+      priority
+    };
+  }
+
+  // Verificar micrometas completadas
+  checkCompletedMicrometas(goals: Goal[]): Notification[] {
+    const newNotifications: Notification[] = [];
+    
+    goals.forEach(goal => {
+      if (goal.micrometas) {
+        goal.micrometas.forEach(micrometa => {
+          const progress = (micrometa.current / micrometa.target) * 100;
+          
+          // Si la micrometa está al 100% pero no está marcada como completada
+          if (progress >= 100 && micrometa.status !== 'Completado') {
+            const notification = this.generateMicrometaCompletedNotification(micrometa, goal);
+            newNotifications.push(notification);
+          }
+        });
+      }
+    });
+
+    return newNotifications;
   }
 }
 

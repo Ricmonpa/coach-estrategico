@@ -12,6 +12,7 @@ export interface Goal {
   reminderFrequency: 'daily' | 'weekly' | 'monthly';
   nextReminder: Date;
   deadline?: Date;
+  micrometas?: Omit<Micrometa, 'id'>[];
 }
 
 export interface Resource {
@@ -63,4 +64,36 @@ export interface CoachReminder {
   isCompleted: boolean;
 }
 
-export type ViewType = 'coach' | 'dashboard' | 'metas' | 'recursos' | 'perfil';
+export interface Micrometa {
+  id: number;
+  parentGoalId: number;
+  title: string;
+  description: string;
+  current: number;
+  target: number;
+  unit: string;
+  status: 'En Progreso' | 'Completado';
+  createdAt: Date;
+  lastUpdated: Date;
+  progressHistory: MicrometaProgressEntry[];
+  priority: 'low' | 'medium' | 'high';
+  deadline?: Date;
+}
+
+export interface MicrometaProgressEntry {
+  date: Date;
+  value: number;
+  notes?: string;
+  evidence?: string;
+  links?: string[];
+}
+
+export interface MicrometaProgressData {
+  micrometaId: number;
+  newValue: number;
+  notes?: string;
+  evidence?: string;
+  links?: string[];
+}
+
+export type ViewType = 'coach' | 'dashboard' | 'metas' | 'recursos' | 'perfil' | 'micrometas';
