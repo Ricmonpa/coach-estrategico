@@ -132,18 +132,61 @@ function App() {
           const updatedMicrometas = goal.micrometas.map(micrometa =>
             micrometa.id === micrometaId ? { ...micrometa, ...updates } : micrometa
           );
-          return { ...goal, micrometas: updatedMicrometas, lastUpdated: new Date() };
+          
+          // Calcular el progreso de la macro-meta basado en las micro-metas
+          const totalMicrometas = updatedMicrometas.length;
+          const completedMicrometas = updatedMicrometas.filter(m => m.status === 'Completado').length;
+          const macroProgress = totalMicrometas > 0 ? (completedMicrometas / totalMicrometas) * 100 : 0;
+          
+          // Debug log para ver el cálculo del progreso
+          console.log('📊 Cálculo de progreso de macro-meta:', {
+            totalMicrometas,
+            completedMicrometas,
+            macroProgress: macroProgress.toFixed(1) + '%',
+            goalTitle: goal.title
+          });
+          
+          // Determinar si la macro-meta está completada
+          const isMacroCompleted = completedMicrometas === totalMicrometas && totalMicrometas > 0;
+          const wasMacroCompleted = goal.status === 'Completado';
+          
+          // Si la macro-meta se acaba de completar, mostrar notificación especial
+          if (isMacroCompleted && !wasMacroCompleted) {
+            setTimeout(() => {
+              showToast({
+                type: 'success',
+                title: '🏆 ¡MACRO-META COMPLETADA!',
+                message: `¡Increíble! Has completado todas las micrometas de "${goal.title}". ¡Eres imparable!`,
+                duration: 6000
+              });
+            }, 100);
+          }
+          
+          return { 
+            ...goal, 
+            micrometas: updatedMicrometas, 
+            lastUpdated: new Date(),
+            // Actualizar el progreso de la macro-meta basado en las micro-metas
+            current: Math.round(macroProgress),
+            status: isMacroCompleted ? 'Completado' : 'En Progreso'
+          };
         }
         return goal;
       });
     });
 
+    // Verificar si se completó una micrometa
+    const updatedMicrometa = updates;
+    const isMicrometaCompleted = updatedMicrometa.status === 'Completado';
+    
     // Mostrar toast de confirmación
     showToast({
-      type: 'success',
-      title: '📊 Progreso Actualizado',
-      message: 'El progreso de la micrometa ha sido actualizado exitosamente',
-      duration: 3000
+      type: isMicrometaCompleted ? 'success' : 'info',
+      title: isMicrometaCompleted ? '🎉 ¡Micrometa Completada!' : '📊 Progreso Actualizado',
+      message: isMicrometaCompleted 
+        ? '¡Excelente! Has completado una micrometa. ¡Sigue así!' 
+        : 'El progreso de la micrometa ha sido actualizado exitosamente',
+      duration: isMicrometaCompleted ? 5000 : 3000
     });
   };
 

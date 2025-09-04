@@ -129,7 +129,34 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
     const generateMicrometasFromPlan = (planItems: string[], parentGoalId: number): Micrometa[] => {
       if (!planItems || planItems.length === 0) return [];
       
-      return planItems.map((item, index) => {
+      // Función para dividir elementos que contengan múltiples actividades
+      const splitPlanItems = (items: string[]): string[] => {
+        const splitItems: string[] = [];
+        
+        items.forEach(item => {
+          // Detectar si el elemento contiene múltiples actividades numeradas
+          // Patrones como "1. Actividad 1 2. Actividad 2 3. Actividad 3"
+          const numberedPattern = /(\d+\.\s*[^0-9]+?)(?=\s*\d+\.|$)/g;
+          const matches = item.match(numberedPattern);
+          
+          if (matches && matches.length > 1) {
+            // Si encontramos múltiples actividades numeradas, las dividimos
+            console.log('🔀 Dividiendo elemento con múltiples actividades:', matches);
+            splitItems.push(...matches.map(match => match.trim()));
+          } else {
+            // Si no hay múltiples actividades numeradas, mantener el elemento original
+            splitItems.push(item);
+          }
+        });
+        
+        return splitItems;
+      };
+      
+      // Dividir elementos que contengan múltiples actividades
+      const processedPlanItems = splitPlanItems(planItems);
+      console.log('📋 Plan procesado:', processedPlanItems);
+      
+      return processedPlanItems.map((item, index) => {
         // Determinar prioridad basada en la posición y contenido
         let priority: 'high' | 'medium' | 'low' = 'medium';
         if (index === 0) priority = 'high'; // Primera acción es alta prioridad
@@ -183,6 +210,19 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
         const weeksMatch = metaText.match(/(\d+)\s*semanas?/i);
         const monthsMatch = metaText.match(/(\d+)\s*meses?/i);
         
+        // Función para validar y corregir fechas
+        const validateAndCorrectDate = (date: Date): Date => {
+          const now = new Date();
+          // Si la fecha está en el pasado, agregar tiempo para que sea futura
+          if (date < now) {
+            console.log('⚠️ Fecha en el pasado detectada, corrigiendo...');
+            // Agregar 2 semanas por defecto si la fecha está en el pasado
+            date.setDate(date.getDate() + 14);
+            console.log('✅ Fecha corregida a:', date.toLocaleDateString());
+          }
+          return date;
+        };
+
         // Calcular fecha límite si hay tiempo especificado
         let deadline: Date | undefined;
         if (timeMatch) {
@@ -198,6 +238,32 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
             deadline.setMonth(deadline.getMonth() + timeValue);
           } else if (timeUnit.includes('año')) {
             deadline.setFullYear(deadline.getFullYear() + timeValue);
+          }
+          
+          // Validar y corregir la fecha
+          deadline = validateAndCorrectDate(deadline);
+        }
+        
+        // Buscar fechas específicas en el texto de la meta (como "20 de Octubre de 2023")
+        const specificDateMatch = metaText.match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/i);
+        if (specificDateMatch) {
+          const day = parseInt(specificDateMatch[1]);
+          const monthName = specificDateMatch[2].toLowerCase();
+          const year = parseInt(specificDateMatch[3]);
+          
+          // Mapear nombres de meses en español
+          const monthMap: { [key: string]: number } = {
+            'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5,
+            'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+          };
+          
+          const month = monthMap[monthName];
+          if (month !== undefined) {
+            const specificDate = new Date(year, month, day);
+            console.log('📅 Fecha específica detectada:', specificDate.toLocaleDateString());
+            
+            // Validar y corregir la fecha específica
+            deadline = validateAndCorrectDate(specificDate);
           }
         }
         
@@ -394,6 +460,10 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
       }
     };
 
+    // Debug: Log del plan de acción recibido
+    console.log('🔍 Plan de acción recibido del AI:', response.plan);
+    console.log('📊 Número de elementos en el plan:', response.plan?.length);
+    
     const goalData = response.meta ? extractGoalFromMeta(response.meta, response.plan) : null;
 
     return (

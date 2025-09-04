@@ -16,10 +16,15 @@ const MicrometasView = ({ parentGoal, micrometas, onBack, onUpdateMicrometa }: M
   const [showProgressModal, setShowProgressModal] = useState(false);
 
   const handleUpdateProgress = (micrometaId: number) => {
+    console.log('🔍 Botón Actualizar clickeado para micrometa ID:', micrometaId);
     const micrometa = micrometas.find(m => m.id === micrometaId);
+    console.log('📋 Micrometa encontrada:', micrometa);
     if (micrometa) {
       setSelectedMicrometa(micrometa);
       setShowProgressModal(true);
+      console.log('✅ Modal abierto para micrometa:', micrometa.title);
+    } else {
+      console.error('❌ No se encontró la micrometa con ID:', micrometaId);
     }
   };
 
@@ -49,6 +54,7 @@ const MicrometasView = ({ parentGoal, micrometas, onBack, onUpdateMicrometa }: M
   };
 
   const handleCloseModal = () => {
+    console.log('🚪 Cerrando modal de progreso');
     setShowProgressModal(false);
     setSelectedMicrometa(null);
   };
@@ -126,7 +132,7 @@ const MicrometasView = ({ parentGoal, micrometas, onBack, onUpdateMicrometa }: M
           </div>
 
           {/* Estadísticas generales */}
-          <div className="bg-gray-800/50 rounded-2xl p-6 mb-8 border border-gray-700/50">
+          <div className="progress-general-card bg-gray-800/50 rounded-3xl p-6 mb-8 border border-gray-700/50">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-white flex items-center">
                 <Target className="w-6 h-6 mr-3 text-blue-400" />
@@ -179,12 +185,15 @@ const MicrometasView = ({ parentGoal, micrometas, onBack, onUpdateMicrometa }: M
 
       {/* Modal de progreso */}
       {selectedMicrometa && (
-        <MicrometaProgressModal
-          micrometa={selectedMicrometa}
-          isOpen={showProgressModal}
-          onClose={handleCloseModal}
-          onSubmit={handleProgressSubmit}
-        />
+        <>
+          {console.log('🎭 Renderizando modal para micrometa:', selectedMicrometa.title, 'isOpen:', showProgressModal)}
+          <MicrometaProgressModal
+            micrometa={selectedMicrometa}
+            isOpen={showProgressModal}
+            onClose={handleCloseModal}
+            onSubmit={handleProgressSubmit}
+          />
+        </>
       )}
     </>
   );

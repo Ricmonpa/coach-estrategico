@@ -87,7 +87,7 @@ const MicrometaCard = ({ micrometa, onUpdateProgress }: MicrometaCardProps) => {
   };
 
   return (
-    <div className="micrometa-card rounded-lg p-6 animate-fade-in border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200">
+    <div className="micrometa-card rounded-2xl p-6 animate-fade-in border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h4 className="text-lg font-bold text-white leading-tight mb-2">{micrometa.title}</h4>
@@ -126,7 +126,10 @@ const MicrometaCard = ({ micrometa, onUpdateProgress }: MicrometaCardProps) => {
       {/* Botón para actualizar progreso */}
       <div className="flex justify-end mt-4">
         <button
-          onClick={() => onUpdateProgress(micrometa.id)}
+          onClick={() => {
+            console.log('🖱️ Botón Actualizar clickeado en MicrometaCard para ID:', micrometa.id);
+            onUpdateProgress(micrometa.id);
+          }}
           className="bg-blue-600/40 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-full border border-blue-500/40 hover:border-blue-400 transition-all duration-200"
           style={{
             backgroundColor: 'rgba(37, 99, 235, 0.4)',

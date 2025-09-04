@@ -63,9 +63,11 @@ const MicrometaProgressModal = ({ micrometa, isOpen, onClose, onSubmit }: Microm
 
   if (!isOpen) return null;
 
+  console.log('🎭 MicrometaProgressModal renderizando con isOpen:', isOpen, 'micrometa:', micrometa.title);
+
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999]">
-      <div className="bg-slate-900/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-lg p-6 border border-blue-600/30 mx-4">
+    <div className="progress-modal">
+      <div className="progress-modal-content w-full max-w-lg p-6 mx-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

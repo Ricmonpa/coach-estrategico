@@ -420,6 +420,21 @@ nav button > div {
   margin-bottom: 0 !important;
 }
 
+/* Micrometa card specific styles */
+.micrometa-card {
+  background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  border-radius: 1rem !important; /* rounded-2xl = 1rem */
+  padding: 1.5rem !important;
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 1rem !important;
+}
+
 .goal-card:hover {
   border-color: rgba(75, 85, 99, 0.5);
   box-shadow: 
@@ -427,6 +442,30 @@ nav button > div {
     0 8px 12px -4px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
+}
+
+.micrometa-card:hover {
+  border-color: rgba(75, 85, 99, 0.5);
+  box-shadow: 
+    0 20px 40px -10px rgba(0, 0, 0, 0.4),
+    0 8px 12px -4px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Progress general card specific styles */
+.progress-general-card {
+  background: rgba(31, 41, 55, 0.5) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  border-radius: 1.5rem !important; /* rounded-3xl = 1.5rem */
+  padding: 1.5rem !important;
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 2rem !important;
 }
 
 /* Ensure proper spacing between goal cards */
