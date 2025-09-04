@@ -12,7 +12,7 @@ export interface Goal {
   reminderFrequency: 'daily' | 'weekly' | 'monthly';
   nextReminder: Date;
   deadline?: Date;
-  micrometas?: Omit<Micrometa, 'id'>[];
+  micrometas?: Micrometa[];
 }
 
 export interface Resource {

@@ -72,7 +72,7 @@ function App() {
     // Removemos la lógica que forzaba el sidebar abierto en desktop
   }, [isMobile]); // Solo se ejecuta cuando cambia isMobile
 
-  const handleAddGoal = (newGoal: Omit<Goal, 'id'>) => {
+  const handleAddGoal = (newGoal: Omit<Goal, 'id'> & { micrometas?: Omit<Micrometa, 'id'>[] }) => {
     const goalId = Date.now();
     
     // Asignar IDs a las micrometas si existen

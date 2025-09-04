@@ -126,7 +126,7 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
     }
 
     // Función para generar micrometas automáticamente basadas en el plan de acción
-    const generateMicrometasFromPlan = (planItems: string[], parentGoalId: number): Omit<Micrometa, 'id'>[] => {
+    const generateMicrometasFromPlan = (planItems: string[], parentGoalId: number): Micrometa[] => {
       if (!planItems || planItems.length === 0) return [];
       
       return planItems.map((item, index) => {
@@ -147,6 +147,7 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
         }
         
         return {
+          id: Date.now() + index, // ID temporal que se corregirá en App.tsx
           parentGoalId,
           title: item.length > 50 ? item.substring(0, 47) + '...' : item,
           description: item,
@@ -164,7 +165,7 @@ const CoachChat = ({ resources, onCreateGoal, isLoading, apiStatus, messages, in
     };
 
     // Función para extraer información de la meta y generar micrometas automáticamente
-    const extractGoalFromMeta = (metaText: string, planItems: string[] = []): Omit<Goal, 'id'> | null => {
+    const extractGoalFromMeta = (metaText: string, planItems: string[] = []): Omit<Goal, 'id'> & { micrometas?: Micrometa[] } | null => {
       try {
         console.log('🔍 Analizando meta:', metaText); // Debug log
         console.log('📋 Plan de acción para micrometas:', planItems); // Debug log

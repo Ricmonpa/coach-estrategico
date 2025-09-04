@@ -1,4 +1,4 @@
-import type { Goal, Resource, Notification, CoachReminder, Micrometa } from '../types/index';
+import type { Goal, Resource, Notification, CoachReminder } from '../types/index';
 
 export const initialGoals: Goal[] = [
   {
